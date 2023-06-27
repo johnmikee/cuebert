@@ -11,7 +11,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/rs/zerolog v1.29.1
 	github.com/rzajac/zltest v0.12.0
-	github.com/shomali11/slacker v1.3.0
+	github.com/shomali11/slacker v1.4.1
 	github.com/slack-go/slack v0.12.2
 	github.com/stretchr/testify v1.8.4
 	github.com/vicanso/go-charts/v2 v2.6.1
@@ -39,8 +39,8 @@ require (
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/robfig/cron v1.2.0 // indirect
 	github.com/rogpeppe/go-internal v1.10.0 // indirect
-	github.com/sashabaranov/go-openai v1.12.0 // indirect
 	github.com/shomali11/commander v0.0.0-20220716022157-b5248c76541a // indirect
 	github.com/shomali11/proper v0.0.0-20180607004733-233a9a872c30 // indirect
 	github.com/wcharczuk/go-chart/v2 v2.1.0 // indirect

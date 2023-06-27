@@ -1,0 +1,62 @@
+{
+    "display_information": {
+        "name": "Bertcue",
+        "description": "Bot to help encourage OS upgrades",
+        "background_color": "#2c2d30"
+    },
+    "features": {
+        "bot_user": {
+            "display_name": "Bert-cue",
+            "always_online": false
+        }
+    },
+    "oauth_config": {
+        "scopes": {
+            "user": [
+                "channels:history",
+                "channels:write",
+                "files:write",
+                "groups:write",
+                "im:history",
+                "im:read",
+                "im:write",
+                "mpim:write",
+                "users:read",
+                "reactions:write"
+            ],
+            "bot": [
+                "app_mentions:read",
+                "channels:history",
+                "channels:join",
+                "channels:manage",
+                "channels:read",
+                "chat:write",
+                "files:read",
+                "files:write",
+                "groups:write",
+                "groups:write.invites",
+                "im:history",
+                "im:read",
+                "im:write",
+                "mpim:history",
+                "mpim:read",
+                "mpim:write",
+                "users:read",
+                "users:read.email",
+                "reactions:write"
+            ]
+        }
+    },
+    "settings": {
+        "event_subscriptions": {
+            "bot_events": [
+                "app_mention",
+                "message.channels",
+                "message.im"
+            ]
+        },
+        "org_deploy_enabled": false,
+        "socket_mode_enabled": true,
+        "token_rotation_enabled": false
+    }
+}

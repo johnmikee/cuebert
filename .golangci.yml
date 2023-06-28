@@ -1,0 +1,39 @@
+---
+run:
+  deadline: 3m
+fast: false
+linters:
+  enable:
+    - errcheck
+    - gas
+    - gocritic
+    - gofmt
+    - goimports
+    - govet
+    - gosimple
+    - ineffassign
+    - megacheck
+    - misspell
+    - nakedret
+    - staticcheck
+    - typecheck
+    - gosec
+    - unparam
+    - unused
+    - zerologlint
+disable:
+  - depguard
+  - dupl
+  - gocyclo
+  - interfacer
+  - lll
+  - maligned
+  - prealloc
+issues:
+  # Excluding configuration per-path, per-linter, per-text and per-source
+  exclude-rules:
+    # Exclude known linters from partially hard-vendored code,
+    # which is impossible to exclude via `nolint` comments.
+    - path: _test\.go
+      linters:
+        - gosec

@@ -1,0 +1,26 @@
+name: build-cue-docker
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b # v3.2.0
+
+      - name: build-docker-cue
+        run: make docker-cue
+
+      - name: run-docker-cue
+        run: make run-docker-cue
+
+      - name: build-docker-cuebert
+        run: make docker-cuebert
+
+      - name: run-docker-cuebert
+        run: make run-docker-cuebert

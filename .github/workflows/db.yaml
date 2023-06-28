@@ -1,0 +1,76 @@
+name: pgsql-config-and-connection
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+jobs:
+  container-job:
+    runs-on: ubuntu-latest
+    container: golang:latest
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_DB: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_PORT: 5432
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b # v3.2.0
+      - run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: setup-go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.19
+
+      - name: install-psql
+        run: |
+          apt-get update
+          apt-get install postgresql-client -y
+
+      - name: add-user
+        env:
+          PGPASSWORD: postgres
+        run: bash resources/db/create.sh -u true -h postgres
+
+      - name: config-db
+        env:
+          PGPASSWORD: postgres
+        run: bash resources/db/create.sh -d true -h postgres
+
+      - name: config-tables
+        env:
+          PGPASSWORD: cue
+        run: bash resources/db/create.sh -t true -h postgres
+
+      - name: build-cue
+        env:
+          CUE_DB_ADDRESS: postgres
+          CUE_DB_USER: cue
+          CUE_DB_PASS: cue
+          CUE_DB_NAME: cue
+          CUE_DB_PORT: 5432
+        run: |
+          make deps
+          make cue
+
+      - name: run-cue
+        env:
+          CUE_DB_ADDRESS: postgres
+          CUE_DB_USER: cue
+          CUE_DB_PASS: cue
+          CUE_DB_NAME: cue
+          CUE_DB_PORT: 5432
+        run: ./build/linux/cue -env-type=prod db test-connection

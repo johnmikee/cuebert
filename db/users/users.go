@@ -10,8 +10,8 @@ import (
 	"github.com/johnmikee/cuebert/pkg/logger"
 )
 
-// UserInfo represents the columns in the users table
-type UserInfo struct {
+// Info represents the columns in the users table
+type Info struct {
 	MDMID        string     `json:"user_mdm_id"`
 	UserLongName string     `json:"user_long_name"`
 	UserEmail    string     `json:"user_email"`
@@ -21,7 +21,7 @@ type UserInfo struct {
 	UpdatedAt    *time.Time `json:"updated_at"`
 }
 
-type UI []UserInfo
+type UI []Info
 
 func (u UI) Empty() bool {
 	return len(u) == 0

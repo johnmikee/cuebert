@@ -44,7 +44,7 @@ deps:
 test:
 	go test -cover ./...
 
-build: cue cuebert
+build: cuebert
 
 clean:
 	rm -rf build/
@@ -54,48 +54,16 @@ clean:
 	mkdir -p build/darwin
 	mkdir -p build/linux
 
-install-local: \
-	install-cue \
-	install-cuebert
-
-.pre-cue:
-	$(eval APP_NAME = cue)
-
-cue: .pre-build .pre-cue
-	go build -o build/$(CURRENT_PLATFORM)/cue -ldflags ${BUILD_VERSION} ./cmd/cue
-
-xp-cue: .pre-build .pre-cue
-	GOOS=darwin go build -o build/darwin/cue -ldflags ${BUILD_VERSION} ./cmd/cue
-	GOOS=linux CGO_ENABLED=0 go build -o build/linux/cue -ldflags ${BUILD_VERSION} ./cmd/cue
-
-install-cue: .pre-cue
-	go install -ldflags ${BUILD_VERSION} ./cmd/cue
-
 APP_NAME = cuebert
 
 .pre-cuebert:
 	$(eval APP_NAME = cuebert)
 
 cuebert: .pre-build .pre-cuebert
-	go build -o build/$(CURRENT_PLATFORM)/cuebert -ldflags ${BUILD_VERSION} ./cmd/cuebert
+	go build -o build/$(CURRENT_PLATFORM)/cuebert -ldflags ${BUILD_VERSION} ./cuebert
 
-install-cuebert: .pre-cuebert
-	go install -ldflags ${BUILD_VERSION} ./cmd/cuebert
-
-xp-cuebert: .pre-build .pre-cuebert
-	GOOS=darwin go build -o build/darwin/cuebert -ldflags ${BUILD_VERSION} ./cmd/cuebert
-	GOOS=linux CGO_ENABLED=0 go build -o build/linux/cuebert -ldflags ${BUILD_VERSION} ./cmd/cuebert
-
-release-zip: xp-cue xp-cuebert
-	zip -r cue_${VERSION}.zip build/
-
-docker-cue:
-	cp resources/Docker/cue/Dockerfile .
-	docker build -t cue --rm .
-	rm Dockerfile
-
-run-docker-cue:
-	docker run cue cue version
+install: .pre-cuebert
+	go install -ldflags ${BUILD_VERSION} ./cuebert
 
 docker-cuebert:
 	cp resources/Docker/cuebert/Dockerfile .

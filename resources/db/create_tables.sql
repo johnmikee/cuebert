@@ -18,6 +18,8 @@ CREATE TABLE bot_results (
     delay_date character varying(255),
     delay_time character varying(255),
     delay_sent boolean,
+    reminder_interval int,
+    reminder_waiting boolean,
     serial_number character varying(255),
     tz_offset int,
     created_at timestamp,

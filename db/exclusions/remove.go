@@ -9,7 +9,7 @@ import (
 	"github.com/johnmikee/cuebert/pkg/logger"
 )
 
-type ExclusionRemove struct {
+type Remove struct {
 	db  *pgxpool.Conn
 	dt  sq.StatementBuilderType
 	sql sq.DeleteBuilder
@@ -17,12 +17,12 @@ type ExclusionRemove struct {
 	log logger.Logger
 }
 
-// Remove initializes a new ExclusionRemove struct.
+// Remove initializes a new Remove struct.
 //
-// the methods of ExclusionRemove are used to designate specific
+// the methods of Remove are used to designate specific
 // fields of the statement that will be inserted once Execute is called.
-func (c *Config) Remove() *ExclusionRemove {
-	return &ExclusionRemove{
+func (c *Config) Remove() *Remove {
+	return &Remove{
 		db:  c.db,
 		ctx: context.Background(),
 		log: c.log,
@@ -33,7 +33,7 @@ func (c *Config) Remove() *ExclusionRemove {
 // Remove sends the statement to remove the exclusion after it has been composed.
 //
 // returns the connection which should be closed after checking the error.
-func (u *ExclusionRemove) Execute() (*pgxpool.Conn, error) {
+func (u *Remove) Execute() (*pgxpool.Conn, error) {
 	sql, args, err := u.sql.ToSql()
 
 	u.log.Trace().Str("query", sql).Interface("args", args).Msg("composed sql query")
@@ -55,21 +55,21 @@ func (u *ExclusionRemove) Execute() (*pgxpool.Conn, error) {
 }
 
 // Approved will remove the row based off the status of approval
-func (u *ExclusionRemove) Approved(status bool) *ExclusionRemove {
+func (u *Remove) Approved(status bool) *Remove {
 	u.sql = u.dt.Delete(table).Where(sq.Eq{"approved": status})
 
 	return u
 }
 
 // Serial will remove the row based off the serial number for the user
-func (u *ExclusionRemove) Serial(s string) *ExclusionRemove {
+func (u *Remove) Serial(s string) *Remove {
 	u.sql = u.dt.Delete(table).Where(sq.Eq{"serial_number": s})
 
 	return u
 }
 
 // Email remove the row based off the user_email for the user
-func (u *ExclusionRemove) Email(email string) *ExclusionRemove {
+func (u *Remove) Email(email string) *Remove {
 	u.sql = u.dt.Delete(table).Where(sq.Eq{"user_email": email})
 
 	return u

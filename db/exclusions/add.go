@@ -11,9 +11,9 @@ import (
 	"github.com/pkg/errors"
 )
 
-type ExclusionUpdate struct {
+type Update struct {
 	args  []interface{}
-	e     ExclusionInfo
+	e     Info
 	db    *pgxpool.Conn
 	st    sq.StatementBuilderType
 	query string
@@ -21,13 +21,13 @@ type ExclusionUpdate struct {
 	log   logger.Logger
 }
 
-// AddExclusioninitializes a new UserUpdate struct.
+// Addexclusioninitializes a new UserUpdate struct.
 //
-// the functions below that are methods of ExclusionUpdate
+// the functions below that are methods of Update
 // are used to modify specific fields of the statement that
 // will be inserted once Execute is called.
-func (c *Config) Add() *ExclusionUpdate {
-	return &ExclusionUpdate{
+func (c *Config) Add() *Update {
+	return &Update{
 		db:  c.db,
 		ctx: context.Background(),
 		log: c.log,
@@ -38,7 +38,7 @@ func (c *Config) Add() *ExclusionUpdate {
 // Execute sends the statement to add the user after it has been composed.
 //
 // returns the connection which should be closed after checking the error.
-func (e *ExclusionUpdate) Execute() (*pgxpool.Conn, error) {
+func (e *Update) Execute() (*pgxpool.Conn, error) {
 	query, args, err := e.st.Insert(table).
 		Columns(columns...).
 		Values(
@@ -69,35 +69,35 @@ func (e *ExclusionUpdate) Execute() (*pgxpool.Conn, error) {
 }
 
 // Approved will update the status of the approval
-func (e *ExclusionUpdate) Approved(a bool) *ExclusionUpdate {
+func (e *Update) Approved(a bool) *Update {
 	e.e.Approved = a
 
 	return e
 }
 
 // Email will update the value of the users email
-func (e *ExclusionUpdate) Email(email string) *ExclusionUpdate {
+func (e *Update) Email(email string) *Update {
 	e.e.UserEmail = email
 
 	return e
 }
 
 // Reason will update the value of the reason for exclusion
-func (e *ExclusionUpdate) Reason(r string) *ExclusionUpdate {
+func (e *Update) Reason(r string) *Update {
 	e.e.Reason = r
 
 	return e
 }
 
 // SerialNumber will update the value of the excluded devices serial number
-func (e *ExclusionUpdate) SerialNumber(s string) *ExclusionUpdate {
+func (e *Update) SerialNumber(s string) *Update {
 	e.e.SerialNumber = s
 
 	return e
 }
 
 // Until will update the value of the date the exclusion should last until
-func (e *ExclusionUpdate) Until(t time.Time) *ExclusionUpdate {
+func (e *Update) Until(t time.Time) *Update {
 	e.e.Until = t
 
 	return e

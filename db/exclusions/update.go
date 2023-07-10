@@ -7,14 +7,14 @@ import (
 	"github.com/johnmikee/cuebert/db/parser"
 )
 
-// Update initializes a new ExclusionUpdate struct.
+// Update initializes a new Update struct.
 //
-// The methods of ExclusionUpdate are used to modify which values
+// The methods of Update are used to modify which values
 // will be updated.
 //
 // Those are parsed and the column we are using as the condition to match is passed as the index.
-func (c *Config) Update() *ExclusionUpdate {
-	return &ExclusionUpdate{
+func (c *Config) Update() *Update {
+	return &Update{
 		db:  c.db,
 		ctx: context.Background(),
 		log: c.log,
@@ -25,7 +25,7 @@ func (c *Config) Update() *ExclusionUpdate {
 // Update sends the statement to update the device after it has been composed.
 //
 // returns the connection which should be closed after checking the error.
-func (u *ExclusionUpdate) Send() (*pgxpool.Conn, error) {
+func (u *Update) Send() (*pgxpool.Conn, error) {
 	_, err := u.db.Exec(
 		u.ctx,
 		u.query, u.args...)
@@ -46,7 +46,7 @@ func (u *ExclusionUpdate) Send() (*pgxpool.Conn, error) {
 // means a foolproof way of sorting the data but given the small subset of
 // columns in our table this will work to compose the arguments before sending
 // it to postgres to be executed.
-func (u *ExclusionUpdate) Parse(index, val string) *ExclusionUpdate {
+func (u *Update) Parse(index, val string) *Update {
 	check := []parser.CheckInfo{
 		{
 			Fn: parser.Prim{
@@ -91,7 +91,7 @@ func (u *ExclusionUpdate) Parse(index, val string) *ExclusionUpdate {
 		Val:    val,
 		Check:  check,
 		Method: parser.Update,
-		Into:   ExclusionInfo{},
+		Into:   Info{},
 	})
 	if err != nil {
 		u.log.Err(err).Msg("parse input")

@@ -11,25 +11,25 @@ import (
 	"github.com/pkg/errors"
 )
 
-type DeviceUpdate struct {
+type Update struct {
 	args   []interface{}
 	ctx    context.Context
-	device *DeviceInfo
+	device *Info
 	db     *pgxpool.Conn
 	log    logger.Logger
 	st     sq.StatementBuilderType
 	query  string
 }
 
-// Add initializes a new DeviceUpdate struct.
+// Add initializes a new Update struct.
 //
-// the functions below that are methods of DeviceUpdate
+// the functions below that are methods of Update
 // are used to modify specific fields of the statement that
 // will be inserted once Execute is called.
-func (c *Config) Add() *DeviceUpdate {
-	return &DeviceUpdate{
+func (c *Config) Add() *Update {
+	return &Update{
 		db:     c.db,
-		device: &DeviceInfo{},
+		device: &Info{},
 		ctx:    context.Background(),
 		log:    c.log,
 		st:     c.st,
@@ -42,7 +42,7 @@ func (c *Config) Add() *DeviceUpdate {
 // - if a table is dropped and rebuilt
 //
 // This will add all devices passed to the DB.
-func (c *Config) AddAllDevices(devices []DeviceInfo) (int64, error) {
+func (c *Config) AddAllDevices(devices DI) (int64, error) {
 	rows := [][]interface{}{}
 	for i := range devices {
 		row := []interface{}{
@@ -73,7 +73,7 @@ func (c *Config) AddAllDevices(devices []DeviceInfo) (int64, error) {
 }
 
 // Execute sends the statement to add the device after it has been composed.
-func (u *DeviceUpdate) Execute() (*pgxpool.Conn, error) {
+func (u *Update) Execute() (*pgxpool.Conn, error) {
 	query, args, err := u.st.Insert(table).
 		Columns(columns...).
 		Values(
@@ -108,56 +108,56 @@ func (u *DeviceUpdate) Execute() (*pgxpool.Conn, error) {
 }
 
 // ID will update the value of the id for the device
-func (u *DeviceUpdate) ID(id string) *DeviceUpdate {
+func (u *Update) ID(id string) *Update {
 	u.device.DeviceID = id
 
 	return u
 }
 
 // Model will update the value of the model for the device.
-func (u *DeviceUpdate) Model(model string) *DeviceUpdate {
+func (u *Update) Model(model string) *Update {
 	u.device.Model = model
 
 	return u
 }
 
 // Name will update the value of the host name for the device.
-func (u *DeviceUpdate) Name(name string) *DeviceUpdate {
+func (u *Update) Name(name string) *Update {
 	u.device.DeviceName = name
 
 	return u
 }
 
 // OS will update the value of the reported OS for the device.
-func (u *DeviceUpdate) OS(os string) *DeviceUpdate {
+func (u *Update) OS(os string) *Update {
 	u.device.OSVersion = os
 
 	return u
 }
 
 // Platform will update the value of the platform for the device.
-func (u *DeviceUpdate) Platform(platform string) *DeviceUpdate {
+func (u *Update) Platform(platform string) *Update {
 	u.device.Platform = platform
 
 	return u
 }
 
 // Serial will update the value of the serial number for the device
-func (u *DeviceUpdate) Serial(serial string) *DeviceUpdate {
+func (u *Update) Serial(serial string) *Update {
 	u.device.SerialNumber = serial
 
 	return u
 }
 
 // User will update the value of the user for the device
-func (u *DeviceUpdate) User(user string) *DeviceUpdate {
+func (u *Update) User(user string) *Update {
 	u.device.User = user
 
 	return u
 }
 
 // UserMDMID will update the value of the users id for the device
-func (u *DeviceUpdate) UserMDMID(uid string) *DeviceUpdate {
+func (u *Update) UserMDMID(uid string) *Update {
 	u.device.UserMDMID = uid
 
 	return u

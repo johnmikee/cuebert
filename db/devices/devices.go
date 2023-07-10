@@ -9,8 +9,8 @@ import (
 	"github.com/johnmikee/cuebert/pkg/logger"
 )
 
-// DeviceInfo represents the columns in the devices table
-type DeviceInfo struct {
+// Info represents the columns in the devices table
+type Info struct {
 	CreatedAt    *time.Time `json:"created_at"`
 	DeviceID     string     `json:"device_id"`
 	DeviceName   string     `json:"device_name"`
@@ -24,7 +24,7 @@ type DeviceInfo struct {
 	UpdatedAt    *time.Time `json:"updated_at"`
 }
 
-type DI []DeviceInfo
+type DI []Info
 
 func (d DI) Empty() bool {
 	return len(d) == 0

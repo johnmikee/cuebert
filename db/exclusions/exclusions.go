@@ -9,8 +9,8 @@ import (
 	"github.com/johnmikee/cuebert/pkg/logger"
 )
 
-// ExclusionInfo represents the columns in the exclusions table
-type ExclusionInfo struct {
+// Info represents the columns in the exclusions table
+type Info struct {
 	Approved     bool      `json:"approved"`
 	CreatedAt    time.Time `json:"created_at"`
 	SerialNumber string    `json:"serial_number"`
@@ -20,7 +20,7 @@ type ExclusionInfo struct {
 	Until        time.Time `json:"until"`
 }
 
-type EI []ExclusionInfo
+type EI []Info
 
 func (e EI) Empty() bool {
 	return len(e) == 0

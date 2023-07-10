@@ -9,8 +9,8 @@ import (
 	"github.com/johnmikee/cuebert/pkg/logger"
 )
 
-// BotResInfo  represents the columns in the devices table
-type BotResInfo struct {
+// Info represents the columns in the devices table
+type Info struct {
 	SlackID              string    `json:"slack_id"`
 	UserEmail            string    `json:"user_email"`
 	ManagerSlackID       string    `json:"manager_slack_id"`
@@ -26,13 +26,15 @@ type BotResInfo struct {
 	DelayDate            string    `json:"delay_date"`
 	DelayTime            string    `json:"delay_time"`
 	DelaySent            bool      `json:"delay_sent"`
+	ReminderInterval     int       `json:"reminder_interval"`
+	ReminderWaiting      bool      `json:"reminder_waiting"`
 	SerialNumber         string    `json:"serial_number"`
 	TZOffset             int64     `json:"tz_offset"`
 	CreatedAt            time.Time `json:"created_at"`
 	UpdatedAt            time.Time `json:"updated_at"`
 }
 
-type BR []BotResInfo
+type BR []Info
 
 func (b BR) Empty() bool {
 	return len(b) == 0
@@ -63,6 +65,7 @@ var columns = []string{
 	"delay_date",
 	"delay_time",
 	"delay_sent",
+	"reminder_interval",
 	"serial_number",
 	"tz_offset",
 	"created_at",

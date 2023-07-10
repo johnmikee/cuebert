@@ -1,6 +1,6 @@
 FROM golang:1.19 as builder
 
-WORKDIR /go/src/github.com/johnmikee/cuebert
+WORKDIR /go/src/github.com/ramp/it/cue
 
 ARG TARGETARCH
 ARG TARGETOS

@@ -9,8 +9,8 @@ import (
 	"github.com/johnmikee/cuebert/pkg/logger"
 )
 
-// ExclusionQuery holds the configuration for the building and executing the query.
-type ExclusionQuery struct {
+// Query holds the configuration for the building and executing the query.
+type Query struct {
 	db  *pgxpool.Conn
 	log logger.Logger
 	sql sq.SelectBuilder
@@ -21,9 +21,9 @@ type ExclusionQuery struct {
 // in the exclusions table.
 //
 // Valid options are any of the columns in the table which can be accessed
-// by any of the methods of ExclusionQuery below.
-func (c *Config) By() *ExclusionQuery {
-	return &ExclusionQuery{
+// by any of the methods of Query below.
+func (c *Config) Query() *Query {
+	return &Query{
 		db:  c.db,
 		log: c.log,
 		st:  c.st,
@@ -31,7 +31,7 @@ func (c *Config) By() *ExclusionQuery {
 }
 
 // Query executes the query against the db with built query.
-func (q *ExclusionQuery) Query() (EI, error) {
+func (q *Query) Query() (EI, error) {
 	sql, args, err := q.sql.ToSql()
 
 	if err != nil {
@@ -40,7 +40,7 @@ func (q *ExclusionQuery) Query() (EI, error) {
 
 	q.log.Trace().Str("query", sql).Msg("composed sql query")
 
-	ex := []ExclusionInfo{}
+	ex := []Info{}
 
 	rows, err := q.db.Query(
 		context.Background(),
@@ -51,7 +51,7 @@ func (q *ExclusionQuery) Query() (EI, error) {
 	}
 
 	for rows.Next() {
-		var e ExclusionInfo
+		var e Info
 
 		err = rows.Scan(
 			&e.Approved,
@@ -73,28 +73,28 @@ func (q *ExclusionQuery) Query() (EI, error) {
 }
 
 // All returns all exclusions in the table
-func (e *ExclusionQuery) All() *ExclusionQuery {
+func (e *Query) All() *Query {
 	e.sql = e.st.Select("*").From(table)
 
 	return e
 }
 
 // Approved queries the exclusions table for approved requests.
-func (e *ExclusionQuery) Approved(status bool) *ExclusionQuery {
+func (e *Query) Approved(status bool) *Query {
 	e.sql = e.st.Select("*").From(table).Where(sq.Eq{"approved": status})
 
 	return e
 }
 
 // Serial queries the exclusions table for a specific serial number value
-func (e *ExclusionQuery) Serial(id ...string) *ExclusionQuery {
+func (e *Query) Serial(id ...string) *Query {
 	e.sql = e.st.Select("*").From(table).Where(sq.Eq{"serial_number": id})
 
 	return e
 }
 
 // Email queries the exclusions table for a specific device id value
-func (e *ExclusionQuery) Email(id ...string) *ExclusionQuery {
+func (e *Query) Email(id ...string) *Query {
 	e.sql = e.st.Select("*").From(table).Where(sq.Eq{"user_email": id})
 
 	return e

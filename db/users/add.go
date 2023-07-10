@@ -11,9 +11,9 @@ import (
 	"github.com/pkg/errors"
 )
 
-type UserUpdate struct {
+type Update struct {
 	args  []interface{}
-	user  UserInfo
+	user  Info
 	query string
 	db    *pgxpool.Conn
 	st    sq.StatementBuilderType
@@ -27,7 +27,7 @@ type UserUpdate struct {
 // - if a table is dropped and rebuilt
 //
 // This will add all users passed to the DB.
-func (c *Config) AddAllUsers(us []UserInfo) (int64, error) {
+func (c *Config) AddAllUsers(us []Info) (int64, error) {
 	rows := [][]interface{}{}
 	for _, u := range us {
 		if u.MDMID != "" {
@@ -56,13 +56,13 @@ func (c *Config) AddAllUsers(us []UserInfo) (int64, error) {
 
 }
 
-// Add initializes a new UserUpdate struct.
+// Add initializes a new Update struct.
 //
-// the functions below that are methods of UserUpdate
+// the functions below that are methods of Update
 // are used to modify specific fields of the statement that
 // will be inserted once Execute is called.
-func (c *Config) Add() *UserUpdate {
-	return &UserUpdate{
+func (c *Config) Add() *Update {
+	return &Update{
 		db:  c.db,
 		ctx: context.Background(),
 		log: c.log,
@@ -73,7 +73,7 @@ func (c *Config) Add() *UserUpdate {
 // Execute sends the statement to add the user after it has been composed.
 //
 // returns the connection which should be closed after checking the error.
-func (u *UserUpdate) Execute() (*pgxpool.Conn, error) {
+func (u *Update) Execute() (*pgxpool.Conn, error) {
 	query, args, err := u.st.Insert(table).
 		Columns(columns...).
 		Values(
@@ -102,35 +102,35 @@ func (u *UserUpdate) Execute() (*pgxpool.Conn, error) {
 }
 
 // Email will update the value of the users email
-func (u *UserUpdate) Email(user string) *UserUpdate {
+func (u *Update) Email(user string) *Update {
 	u.user.UserEmail = user
 
 	return u
 }
 
 // ID will update the value of the users id
-func (u *UserUpdate) ID(id string) *UserUpdate {
+func (u *Update) ID(id string) *Update {
 	u.user.MDMID = id
 
 	return u
 }
 
 // LongName will update the value of the users full name
-func (u *UserUpdate) LongName(ln string) *UserUpdate {
+func (u *Update) LongName(ln string) *Update {
 	u.user.UserLongName = ln
 
 	return u
 }
 
 // Slack will update the value of the users slack id
-func (u *UserUpdate) Slack(user string) *UserUpdate {
+func (u *Update) Slack(user string) *Update {
 	u.user.UserSlackID = user
 
 	return u
 }
 
 // TZ will update the value of the users tz_offset
-func (u *UserUpdate) TZ(tz int64) *UserUpdate {
+func (u *Update) TZ(tz int64) *Update {
 	u.user.TZOffset = tz
 
 	return u

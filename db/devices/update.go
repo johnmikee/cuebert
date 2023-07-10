@@ -7,15 +7,15 @@ import (
 	"github.com/johnmikee/cuebert/db/parser"
 )
 
-// Update initializes a new DeviceUpdate struct.
+// Update initializes a new Update struct.
 //
-// The methods of DeviceUpdate are used to modify which values
+// The methods of Update are used to modify which values
 // will be updated. those are parsed and the
 // column we are using as the condition to match is passed as the index.
-func (c *Config) Update() *DeviceUpdate {
-	return &DeviceUpdate{
+func (c *Config) Update() *Update {
+	return &Update{
 		db:     c.db,
-		device: &DeviceInfo{},
+		device: &Info{},
 		ctx:    context.Background(),
 		log:    c.log,
 		st:     c.st,
@@ -23,7 +23,7 @@ func (c *Config) Update() *DeviceUpdate {
 }
 
 // Send sends the statement to update the device after it has been composed.
-func (u *DeviceUpdate) Send() (*pgxpool.Conn, error) {
+func (u *Update) Send() (*pgxpool.Conn, error) {
 	_, err := u.db.Exec(
 		u.ctx,
 		u.query, u.args...)
@@ -39,8 +39,8 @@ func (u *DeviceUpdate) Send() (*pgxpool.Conn, error) {
 }
 
 // Parse will take the input provided by the user via the methods
-// of DeviceUpdate and compose a statement.
-func (u *DeviceUpdate) Parse(index, val string) *DeviceUpdate {
+// of Update and compose a statement.
+func (u *Update) Parse(index, val string) *Update {
 	check := []parser.CheckInfo{
 		{
 			Fn: parser.Prim{
@@ -106,7 +106,7 @@ func (u *DeviceUpdate) Parse(index, val string) *DeviceUpdate {
 		Val:    val,
 		Check:  check,
 		Method: parser.Update,
-		Into:   DeviceInfo{},
+		Into:   Info{},
 	})
 	if err != nil {
 		u.log.Err(err).Msg("error with parse input")

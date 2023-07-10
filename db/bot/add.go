@@ -13,9 +13,9 @@ import (
 	"github.com/johnmikee/cuebert/pkg/logger"
 )
 
-type BotResUpdate struct {
+type Update struct {
 	args  []interface{}
-	bresp BotResInfo
+	bresp Info
 	db    *pgxpool.Conn
 	query string
 
@@ -25,13 +25,13 @@ type BotResUpdate struct {
 	log logger.Logger
 }
 
-// AddBR initializes a new BotResUpdate struct.
+// AddBR initializes a new Update struct.
 //
-// the functions below that are methods of BotResUpdate
+// the functions below that are methods of Update
 // are used to modify specific fields of the statement that
 // will be inserted once Execute is called.
-func (c *Config) Add() *BotResUpdate {
-	return &BotResUpdate{
+func (c *Config) Add() *Update {
+	return &Update{
 		db:  c.db,
 		ctx: context.Background(),
 		log: c.log,
@@ -39,7 +39,7 @@ func (c *Config) Add() *BotResUpdate {
 	}
 }
 
-func (c *Config) AddAllDevices(b []BotResInfo) (int64, error) {
+func (c *Config) AddAllDevices(b []Info) (int64, error) {
 	rows := [][]interface{}{}
 	for i := range b {
 		row := []interface{}{
@@ -58,6 +58,8 @@ func (c *Config) AddAllDevices(b []BotResInfo) (int64, error) {
 			b[i].DelayDate,
 			b[i].DelayTime,
 			b[i].DelaySent,
+			b[i].ReminderInterval,
+			b[i].ReminderWaiting,
 			b[i].SerialNumber,
 			b[i].TZOffset,
 			helpers.UpdateTime(),
@@ -80,7 +82,7 @@ func (c *Config) AddAllDevices(b []BotResInfo) (int64, error) {
 // Execute sends the statement to add the bot result after it has been composed.
 //
 // returns the connection which should be closed after checking the error.
-func (u *BotResUpdate) Execute() error {
+func (u *Update) Execute() error {
 	query, args, err := u.st.Insert(table).
 		Columns(columns...).
 		Values(
@@ -99,6 +101,8 @@ func (u *BotResUpdate) Execute() error {
 			u.bresp.DelayDate,
 			u.bresp.DelayTime,
 			u.bresp.DelaySent,
+			u.bresp.ReminderInterval,
+			u.bresp.ReminderWaiting,
 			u.bresp.SerialNumber,
 			u.bresp.TZOffset,
 			helpers.UpdateTime(),
@@ -129,112 +133,126 @@ func (u *BotResUpdate) Execute() error {
 }
 
 // Serial will update the value of the serial for the user response
-func (u *BotResUpdate) Serial(serial string) *BotResUpdate {
+func (u *Update) Serial(serial string) *Update {
 	u.bresp.SerialNumber = serial
 
 	return u
 }
 
 // SlackID will update the value of the users slack id
-func (u *BotResUpdate) SlackID(sid string) *BotResUpdate {
+func (u *Update) SlackID(sid string) *Update {
 	u.bresp.SlackID = sid
 
 	return u
 }
 
 // FirstACK will update if the user acknowledged the first message
-func (u *BotResUpdate) FirstACK(f bool) *BotResUpdate {
+func (u *Update) FirstACK(f bool) *Update {
 	u.bresp.FirstACK = f
 
 	return u
 }
 
 // FirstMessageSent will update if the user was sent the first message
-func (u *BotResUpdate) FirstMessageSent(s bool) *BotResUpdate {
+func (u *Update) FirstMessageSent(s bool) *Update {
 	u.bresp.FirstMessageSent = s
 
 	return u
 }
 
 // FirstMessageSentAt will update the time the first message was sent
-func (u *BotResUpdate) FirstMessageSentAt(t time.Time) *BotResUpdate {
+func (u *Update) FirstMessageSentAt(t time.Time) *Update {
 	u.bresp.FirstMessageSentAt = t
 
 	return u
 }
 
 // FirstMessageWaiting will update if the user is waiting for the first message
-func (u *BotResUpdate) FirstMessageWaiting(w bool) *BotResUpdate {
+func (u *Update) FirstMessageWaiting(w bool) *Update {
 	u.bresp.FirstMessageWaiting = w
 
 	return u
 }
 
 // FirstACKTime will update the time the user acknowledged the first message
-func (u *BotResUpdate) FirstACKTime(t time.Time) *BotResUpdate {
+func (u *Update) FirstACKTime(t time.Time) *Update {
 	u.bresp.FirstACKTime = t
 
 	return u
 }
 
 // FullName will update the users full name
-func (u *BotResUpdate) FullName(n string) *BotResUpdate {
+func (u *Update) FullName(n string) *Update {
 	u.bresp.FullName = n
 
 	return u
 }
 
 // DelayAt will update the time the user delayed
-func (u *BotResUpdate) DelayAt(t time.Time) *BotResUpdate {
+func (u *Update) DelayAt(t time.Time) *Update {
 	u.bresp.DelayAt = t
 
 	return u
 }
 
 // DelayDate will update the date for reminder
-func (u *BotResUpdate) DelayDate(d string) *BotResUpdate {
+func (u *Update) DelayDate(d string) *Update {
 	u.bresp.DelayDate = d
 
 	return u
 }
 
 // DelayTime will update the time for reminder
-func (u *BotResUpdate) DelayTime(d string) *BotResUpdate {
+func (u *Update) DelayTime(d string) *Update {
 	u.bresp.DelayTime = d
 
 	return u
 }
 
 // DelaySent will update the status for the delay. If sent it will be true.
-func (u *BotResUpdate) DelaySent(d bool) *BotResUpdate {
+func (u *Update) DelaySent(d bool) *Update {
 	u.bresp.DelaySent = d
 
 	return u
 }
 
 // ManagerSlackID will update the value for the managers slack id
-func (u *BotResUpdate) ManagerID(m string) *BotResUpdate {
+func (u *Update) ManagerID(m string) *Update {
 	u.bresp.ManagerSlackID = m
 
 	return u
 }
 
 // ManagerMessageSent will update the value for the manager message sent
-func (u *BotResUpdate) ManagerMessageSent(m bool) *BotResUpdate {
+func (u *Update) ManagerMessageSent(m bool) *Update {
 	u.bresp.ManagerMessageSent = m
 
 	return u
 }
 
 // ManagerMessageSentAt will update the value for the manager message sent at
-func (u *BotResUpdate) ManagerMessageSentAt(m time.Time) *BotResUpdate {
+func (u *Update) ManagerMessageSentAt(m time.Time) *Update {
 	u.bresp.ManagerMessageSentAt = m
 
 	return u
 }
 
+// ReminderInterval will update the value for the reminder interval
+func (u *Update) ReminderInterval(r int) *Update {
+	u.bresp.ReminderInterval = r
+
+	return u
+}
+
+// ReminderWaiting will update the value for the reminder waiting
+func (u *Update) ReminderWaiting(r bool) *Update {
+	u.bresp.ReminderWaiting = r
+
+	return u
+}
+
 // UserEmail will update the value for the users email
-func (u *BotResUpdate) UserEmail(e string) *BotResUpdate {
+func (u *Update) UserEmail(e string) *Update {
 	u.bresp.UserEmail = e
 
 	return u

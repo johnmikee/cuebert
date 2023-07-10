@@ -35,3 +35,5 @@ __pycache__/
 
 # For testing docker
 .env
+
+.build/

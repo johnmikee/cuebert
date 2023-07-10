@@ -25,4 +25,4 @@ jobs:
     - name: build
       run: |
         make deps
-        make cue
+        make cuebert

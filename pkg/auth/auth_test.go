@@ -18,7 +18,10 @@ const testSvc = "authAsaurusRex"
 // teardown deletes the keys from the keyring
 func teardown(keys []string) {
 	for _, key := range keys {
-		keyring.Delete(key, svc)
+		err := keyring.Delete(key, svc)
+		if err != nil {
+			fmt.Println(err)
+		}
 	}
 }
 

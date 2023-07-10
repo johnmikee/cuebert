@@ -93,6 +93,13 @@ func (u *Remove) ManagerMessageSent(d bool) *Remove {
 	return u
 }
 
+// ReminderWaiting will remove based off if the reminder is waiting or not
+func (u *Remove) ReminderWaiting(d bool) *Remove {
+	u.sql = u.st.Delete(table).Where(sq.Eq{"reminder_waiting": d})
+
+	return u
+}
+
 // SlackID will remove based off slack id
 func (u *Remove) SlackID(id ...string) *Remove {
 	u.sql = u.st.Delete(table).Where(sq.Eq{"slack_id": id})

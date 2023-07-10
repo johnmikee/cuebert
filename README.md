@@ -13,8 +13,9 @@ cuebert
 - [⚙️ Credential Configuration](#credential-configuration)
 - [🔄 Flow](#flow)
 - [🖼️ Images](#images)
-- [💬 Messaging](#messaging)
+- [💬 Methods](#methods)
 - [⏰ Reminders](#reminders)
+- [💬 Deadline](#deadline)
 - [🧪 Testing](#testing)
 - [🗄️ DB](#db)
 - [📚 Resources](#resources)
@@ -45,7 +46,7 @@ There are three ways to store the required credentials for the program environme
 
 If testing locally the program will default to `-env-type=dev` which handles authentication through the system keychain using [keyring](https://github.com/zalando/go-keyring). If running the program in production it is recommended to set the credentials as environmental variables.<br />
 
-To set the environmental variables take any of the json key [values](cuebert/config.go#L17-28) in the `Config` struct, prepend them with `CUEBERT` and export the value. <br />
+To set the environmental variables take any of the json key values in the `Config` struct, prepend them with `CUEBERT` and export the value. <br />
 
 ex: <br />
 ```
@@ -86,15 +87,21 @@ At this point Cuebert begins maintenance tasks. Three routines are started and w
 * Poll Reminders
     - Every 15 minutes [pollReminders](cuebert/check.go) runs to see if anyone needs a custom OS upgrade reminder set. Since a user can set a reminder for any point, at any time, we need to regularly check this data. Should a reminder be set in within the next 15 minutes of check running a routine is started to remind the user at that time.
 <br />
+
 ______________________________________________________________________
 
-## Messaging 
-There are two main messages Cuebert will send. The first is sent once a new os requirement is set to inform the user an upgrade is required.<br />
-![alt text](.docs/images/first_message.png)
+## Methods
+There are two methods for Cuebert to run in - timebound and manager. 
 <br />
-This notification comes with a button for the user to acknowledge they have received the message. When the button is clicked it is recorded that the message has been read and the time at which this was done. This action allows us to verify that the user knows there is a required update and that they have agreed to do it within the alloted time frame.<br />
 
-The second message is sent midweek which creates a group DM between Cuebert,the users manager, and the user _if_ the device is still out of compliance.
+### Timebound
+Timebound is a more traditional [nudge](https://github.com/macadmins/nudge) like approach. Users are reminded on a set schedule until the update is complete. The reminders can be deferred until a specific date, delayed, or changed in frequency.<br />
+* Note - this method is still being fully built out and tested.
+<br />
+
+### Manager
+This approach leverages a companies people management to facilitate updating machines that are on older versions. A new version is pushed out and if the user does not update Cuebert drops the user and their manager in a room to chat about whats going on. This method does not remind constantly or daily and relies on the relationship between manager and IC to be the push.
+<br />
 ______________________________________________________________________
 
 ## Reminders
@@ -106,6 +113,10 @@ If the user clicks yes a date/time modal appears to set the reminder.<br />
 <br />
 ![alt text](.docs/images/date_time_modal.png)
 <br />
+______________________________________________________________________
+
+## Deadline
+Each method implements a Deadline interface. Since this is highly subjective to each organization it is hard to put anything sane there that anyone could use. Examples will be added as ideas but it is your responsibility to implement what works for you.
 ______________________________________________________________________
 
 ## Testing
@@ -229,7 +240,6 @@ ______________________________________________________________________
 ### Using cuebert
 
 ```sh
-./build/darwin/cuebert -h      
 Usage of ./build/darwin/cuebert:
   -auth-users string
         Set which users can perform authorized functions. (comma separated)
@@ -252,11 +262,11 @@ Usage of ./build/darwin/cuebert:
   -env-type string
         Set the env type. Options are [prod, dev]. (default "dev")
   -help-docs-url string
-        the url to the cuebert docs. (default "https://ramp.slab.com/posts/cuebert-hem79mkb")
+        the url to the cuebert docs. (default "https://help.megacorp.com/cuebert")
   -help-repo-url string
-        the url to the cuebert repo. (default "https://github.com/ramp/cue")
+        the url to the cuebert repo. (default "https://github.com/johnmikee/cuebert")
   -help-ticket-url string
-        the url to the cuebert ticketing system. (default "https://linear.app/tryramp/team/IT/active")
+        the url to the cuebert ticketing system. (default "https://tickets.megacorp.com/cuebert")
   -idp string
         Set the IDP to use. Options are [okta]. (default "okta")
   -init

@@ -13,18 +13,16 @@ func firstMessage(day time.Time) string {
 	return fmt.Sprintf(`
 Hello, you are receiving this message because your laptop macOS is out of date.
 
-In order to have continued access to Ramp Data/Systems (e.g., Gmail, Okta, Zoom) your device must be compliant with our company <https://app.drata.com/employee/policy/30|security policies>. 
+In order to have continued access to Megacorp Systems (e.g., Gmail, Okta, Zoom) your device must be compliant with our company security policies. 
 Our policies *state that your macOS must be up to date* because upgrading your device is crucial for a secure work environment.
 
-If your device continues to stay out of compliance, you will lose access to Ramp data/systems at the end of the week.
+If your device continues to stay out of compliance, you will lose access to Megacorp systems at the end of the week.
 
 To upgrade macOS, go to *System Preferences*, and click *Software Update*.
 
 Once you have clicked *Upgrade Now*, the update will begin downloading.  A progress bar will show the status of the download and during this time you can still use your computer as you normally would.
 
-*Your Manager will be engaged if your device is not compliant by %s.*
-
-Post in #team-it if you have any trouble updating your machine.
+*Your device must be compliant by %s.*
 	`, day.Format("Monday, January 2, 2006"))
 }
 
@@ -32,13 +30,11 @@ func managerMessaging(userName, firstMessageSent, usersSlackID string) string {
 	return fmt.Sprintf(`
 We would like to bring to your attention that %s has not yet upgraded their laptop to the latest operating system. We sent previous communication to do so on %s.
 
-As %s manager, please work with them to ensure they are not locked out of Ramp Data/Systems (e.g., Gmail, Slack, Zoom) by having them update their macOS by EOW.
-
-Ramp issued devices not in compliance according to our <https://app.drata.com/employee/policy/30|Information Security Policies> will have access to Ramp data/systems restricted by the end of the week.
+As %s manager, please work with them to ensure they are not locked out of Megacorp Data/Systems (e.g., Gmail, Slack, Zoom) by having them update their macOS by EOW.
 
 <@%s>, please collaborate with your manager to complete the upgrade promptly.
 
-For more information and detailed guidance, refer to this <https://ramp.slab.com/posts/os-upgrade-guidance-bx3mz5qp|Slab Article>.
+For more information and detailed guidance, refer to this <https://www.youtube.com/watch?v=dQw4w9WgXcQ|Article>.
 `,
 		userName,
 		firstMessageSent,

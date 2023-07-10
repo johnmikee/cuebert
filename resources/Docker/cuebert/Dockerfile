@@ -1,17 +1,13 @@
 FROM golang:1.19 as builder
 
-WORKDIR /go/src/github.com/ramp/it/cue
+WORKDIR /go/src/github.com/johnmikee/cuebert
 
 ARG TARGETARCH
 ARG TARGETOS
-ARG SENTRY_RELEASE=dev
-ARG DD_VERSION=dev
 
 ENV CGO_ENABLED=0 \
 	GOARCH=$TARGETARCH \
-	GOOS=$TARGETOS \
-	DD_VERSION=$DD_VERSION \
-	SENTRY_RELEASE=$SENTRY_RELEASE
+	GOOS=$TARGETOS 
 
 COPY . .
 

@@ -5,7 +5,7 @@ go 1.20
 require (
 	github.com/Masterminds/squirrel v1.5.4
 	github.com/hashicorp/go-version v1.6.0
-	github.com/jackc/pgx/v5 v5.4.1
+	github.com/jackc/pgx/v5 v5.4.2
 	github.com/lib/pq v1.10.9
 	github.com/lithammer/fuzzysearch v1.1.8
 	github.com/pkg/errors v0.9.1

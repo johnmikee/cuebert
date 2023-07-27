@@ -69,8 +69,8 @@ github.com/shomali11/commander v0.0.0-20220716022157-b5248c76541a/go.mod h1:bYyJ
 github.com/shomali11/proper v0.0.0-20180607004733-233a9a872c30/go.mod h1:O723XwIZBX3FR45rBic/Eyp/DKo/YtchYFURzpUWY2c=
 github.com/shomali11/proper v0.0.0-20190608032528-6e70a05688e7 h1:wAyBXFZOcLkbaoDlDbMpTCw9xy3yP2YJDMRrbTVuVKU=
 github.com/shomali11/proper v0.0.0-20190608032528-6e70a05688e7/go.mod h1:cg2VM85Y+0BcVSICzB+OafOlTcJ9QPbtF4qtuhuR/GA=
-github.com/shomali11/slacker/v2 v2.0.0-alpha1 h1:Kmeeb8j8PsuiArLtWqYUobCn4/DlUENt6nwI+HHjWig=
-github.com/shomali11/slacker/v2 v2.0.0-alpha1/go.mod h1:sWtfzMAe+5+XC4HC7l7VBcp4pgIi+MhZK9E/ijb0/Cs=
+github.com/shomali11/slacker/v2 v2.0.0-alpha2 h1:HLXarEH1JK5EmxOOOik5iDM56plx9ylVNiXYEpP3alU=
+github.com/shomali11/slacker/v2 v2.0.0-alpha2/go.mod h1:sWtfzMAe+5+XC4HC7l7VBcp4pgIi+MhZK9E/ijb0/Cs=
 github.com/slack-go/slack v0.12.2 h1:x3OppyMyGIbbiyFhsBmpf9pwkUzMhthJMRNmNlA4LaQ=
 github.com/slack-go/slack v0.12.2/go.mod h1:hlGi5oXA+Gt+yWTPP0plCdRKmjsDxecdHxYQdlMQKOw=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=

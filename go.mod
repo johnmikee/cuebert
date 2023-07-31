@@ -9,7 +9,7 @@ require (
 	github.com/lib/pq v1.10.9
 	github.com/lithammer/fuzzysearch v1.1.8
 	github.com/pkg/errors v0.9.1
-	github.com/rs/zerolog v1.29.1
+	github.com/rs/zerolog v1.30.0
 	github.com/rzajac/zltest v0.12.0
 	github.com/shomali11/slacker/v2 v2.0.0-alpha1
 	github.com/slack-go/slack v0.12.2

@@ -12,7 +12,7 @@ require (
 	github.com/rs/zerolog v1.29.1
 	github.com/rzajac/zltest v0.12.0
 	github.com/shomali11/slacker/v2 v2.0.0-alpha1
-	github.com/slack-go/slack v0.12.2
+	github.com/slack-go/slack v0.12.3
 	github.com/stretchr/testify v1.8.4
 	github.com/vicanso/go-charts/v2 v2.6.1
 	github.com/zalando/go-keyring v0.2.3

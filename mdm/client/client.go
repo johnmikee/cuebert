@@ -17,8 +17,7 @@ type MDM struct {
 	Config mdm.Config
 }
 
-// New creates a new MDM provider based on the provided MDM configuration.
-// It returns the MDM provider instance.
+// New creates a new MDM provider based on the provided MDM configuration returning the MDM provider instance.
 func New(m *MDM) mdm.Provider {
 	config := Config{
 		MDMProvider: createMDMProvider(m.MDM),
@@ -35,7 +34,7 @@ func createMDMProvider(providerName mdm.MDM) mdm.Provider {
 	case mdm.Jamf:
 		return &jamf.Client{}
 	case mdm.Kandji:
-		return &kandji.Config{}
+		return &kandji.Client{}
 	default:
 		return nil
 	}

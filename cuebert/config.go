@@ -1,122 +1,269 @@
 package main
 
 import (
-	"github.com/johnmikee/cuebert/cuebert/bot"
-	"github.com/johnmikee/cuebert/cuebert/handlers"
-	"github.com/johnmikee/cuebert/cuebert/method"
-	"github.com/johnmikee/cuebert/cuebert/tables"
-	"github.com/johnmikee/cuebert/db"
-	"github.com/johnmikee/cuebert/idp"
-	"github.com/johnmikee/cuebert/mdm"
+	"flag"
+	"os"
+	"strings"
+
+	"github.com/johnmikee/cuebert/cuebert/config"
+	"github.com/johnmikee/cuebert/cuebert/task"
+	"github.com/johnmikee/cuebert/cuebert/task/implementation"
+
+	"github.com/johnmikee/cuebert/pkg/env"
 	"github.com/johnmikee/cuebert/pkg/logger"
+	"github.com/johnmikee/yae"
 )
 
-// Cuebert is a struct to hold config for the program
-type Cuebert struct {
-	bot           *bot.Bot
-	config        *Config
-	db            *db.DB
-	flags         *Flags
-	log           logger.Logger
-	idp           idp.Provider
-	mdm           mdm.Provider
-	method        method.Actions
-	tables        *tables.Config
-	authUsers     []string
-	testUsers     []string
-	reloadSignal  chan struct{}
-	statusChan    chan handlers.StatusMessage
-	statusHandler *handlers.StatusHandler
-	startSignal   chan struct{}
-	stopSignal    chan struct{}
-	isRunning     bool
-}
+func loadEnv() (*Cuebert, []string) {
+	f := &config.Flags{
+		AuthorizedUsers:         "",
+		AuthUsersFromIDP:        true,
+		CheckInterval:           30,
+		CutoffTime:              "5:00PM",
+		Deadline:                "04/12",
+		Debug:                   false,
+		DefaultReminderInterval: 60,
+		DiffInterval:            15,
+		EnvType:                 string(env.PROD),
+		HelpDocsURL:             "",
+		HelpRepoURL:             "https://github.com/johnmikee/cuebert",
+		HelpTicketURL:           "",
+		IDP:                     "",
+		Init:                    true,
+		LogLevel:                string(logger.TRACE),
+		LogToFile:               true,
+		MakeMigrations:          false,
+		MDM:                     "",
+		PollInterval:            10,
+		RequiredVers:            "14.4.1",
+		ServiceName:             "cuebert",
+		Task:                    string(task.Update),
+		TaskID:                  "",
+		TaskImplementation:      string(implementation.OS),
+		Testing:                 false,
+		TestingEndTime:          "18:00",
+		TestingStartTime:        "11:00",
+		TestingUsers:            "",
+		TestUsers:               []string{},
+	}
+	var testDBConn bool
 
-// Config holds the sensitive values for the program
-type Config struct {
-	AdminGroupID      string `json:"admin_group_id"`
-	DBAddress         string `json:"db_address"`
-	DBName            string `json:"db_name"`
-	DBPass            string `json:"db_pass"`
-	DBPort            string `json:"db_port"`
-	DBUser            string `json:"db_user"`
-	IDPDomain         string `json:"idp_domain"`
-	IDPToken          string `json:"idp_token"`
-	IDPURL            string `json:"idp_url"`
-	MDMKey            string `json:"mdm_key"`
-	MDMURL            string `json:"mdm_url"`
-	SlackAppToken     string `json:"slack_app_token"`
-	SlackAlertChannel string `json:"slack_alert_channel"`
-	SlackBotToken     string `json:"slack_bot_token"`
-	SlackBotID        string `json:"slack_bot_id"`
-}
+	flag.BoolVar(
+		&f.AuthUsersFromIDP,
+		"auth-users-from-idp",
+		f.AuthUsersFromIDP,
+		"Set whether to pull authorized users from the IDP.",
+	)
+	flag.StringVar(
+		&f.AuthorizedUsers,
+		"auth-users",
+		f.AuthorizedUsers,
+		"Set which users can perform authorized functions. (comma separated)",
+	)
+	flag.IntVar(
+		&f.CheckInterval,
+		"check-interval",
+		f.CheckInterval,
+		"the number of minutes between device messaging checks and db clean-ups.",
+	)
+	flag.StringVar(
+		&f.CutoffTime,
+		"cutoff-time",
+		f.CutoffTime,
+		"the hour when the install must be done by (HH:MM:SS).",
+	)
+	flag.StringVar(
+		&f.Deadline,
+		"deadline-date",
+		f.Deadline,
+		"the date the install must be done by (YYYY:MM:DD).",
+	)
+	flag.BoolVar(
+		&f.Debug,
+		"debug",
+		f.Debug,
+		"Run the slacker client in Debug mode.",
+	)
+	flag.IntVar(
+		&f.DefaultReminderInterval,
+		"default-reminder-interval",
+		f.DefaultReminderInterval,
+		"the number of minutes between reminders.",
+	)
+	flag.IntVar(
+		&f.DiffInterval,
+		"diff-interval",
+		f.DiffInterval,
+		"the number of minutes between diff checks.",
+	)
+	flag.StringVar(
+		&f.EnvType,
+		"env-type",
+		f.EnvType,
+		"Set the env type. Options are [prod, dev].",
+	)
+	flag.StringVar(
+		&f.HelpDocsURL,
+		"help-docs-url",
+		f.HelpDocsURL,
+		"the url to the cuebert docs.",
+	)
+	flag.StringVar(
+		&f.HelpRepoURL,
+		"help-repo-url",
+		f.HelpRepoURL,
+		"the url to the cuebert repo.",
+	)
+	flag.StringVar(
+		&f.HelpTicketURL,
+		"help-ticket-url",
+		f.HelpTicketURL,
+		"the url to the cuebert ticketing system.",
+	)
+	flag.StringVar(
+		&f.IDP,
+		"idp",
+		f.IDP,
+		"Set the IDP to use. Options are [okta].",
+	)
+	flag.BoolVar(
+		&f.Init,
+		"init",
+		f.Init,
+		"Start the program, load the config, and wait for input before running.",
+	)
+	flag.BoolVar(
+		&f.LogToFile,
+		"log-to-file",
+		f.LogToFile,
+		"Log results to file.",
+	)
+	flag.StringVar(
+		&f.LogLevel,
+		"log-level",
+		f.LogLevel,
+		"Set the log level.",
+	)
+	flag.BoolVar(
+		&f.MakeMigrations,
+		"make-migrations",
+		f.MakeMigrations,
+		"Create the migrations and exit.",
+	)
+	flag.StringVar(
+		&f.MDM,
+		"mdm",
+		f.MDM,
+		"Set the MDM to use. Options are [jamf, kandji].",
+	)
+	flag.StringVar(
+		&f.ServiceName,
+		"service-name",
+		f.ServiceName,
+		"if using the dev env the service name to store keys under.",
+	)
+	flag.StringVar(
+		&f.Task,
+		"task",
+		f.Task,
+		"what task is being preformed (ex: updates or compliance)",
+	)
+	flag.StringVar(
+		&f.TaskImplementation,
+		"task-impl",
+		f.TaskImplementation,
+		"if using the compliance task, what is carrying that out",
+	)
+	flag.StringVar(
+		&f.TaskID,
+		"task-id",
+		f.TaskID,
+		"if using the compliance task, what is the id of the task",
+	)
+	flag.BoolVar(
+		&f.Testing,
+		"testing",
+		f.Testing,
+		"Log actions that would take place instead of performing them.",
+	)
+	flag.StringVar(
+		&f.TestingEndTime,
+		"testing-end-time",
+		f.TestingEndTime,
+		"the time to end testing (HH:MM).",
+	)
+	flag.StringVar(
+		&f.TestingStartTime,
+		"testing-start-time",
+		f.TestingStartTime,
+		"the time to start testing (HH:MM).",
+	)
+	flag.StringVar(
+		&f.TestingUsers,
+		"testing-users",
+		f.TestingUsers,
+		"a list of slack id's to perform the actions on during testing instead of every user. (comma separated)",
+	)
+	flag.StringVar(
+		&f.RequiredVers,
+		"required-os",
+		f.RequiredVers,
+		"the version to require for the fleet",
+	)
+	flag.IntVar(
+		&f.PollInterval,
+		"poll-interval",
+		f.PollInterval,
+		"the number of minutes between device polling checks.",
+	)
+	flag.BoolVar(
+		&testDBConn,
+		"test-db-conn",
+		false,
+		"test the db connection and exit.",
+	)
+	flag.Parse()
 
-// Flags holds the args for the program
-//
-// init is particularly useful when running in a container and you want
-// be able to start, stop, and change the config from the bot itself.
-type Flags struct {
-	method                  string // ex: manager or time-bound. this sets the cadence for the flow of the program
-	authUsers               string // comma separated list of users to perform authorized actions
-	authUsersFromIDP        bool   // pull authorized users from the idp. if false use the auth-users flag
-	checkInterval           int    // how often to check what cuebert messages need sending
-	clearTables             bool   // clear all tables
-	cutoffTime              string // cutoffTime will be the time access is revoked
-	dailyReport             bool   // send a daily report to the slack channel
-	deadline                string // the day the update is required
-	defaultReminderInterval int    // how often to remind users to update their devices (time-bound only)
-	deviceDiffInterval      int    // how often to check what devices we need to add/remove
-	envType                 string // ex: dev, prod
-	helpDocsURL             string // url to the help docs
-	helpRepoURL             string // url to this repo for the help menu
-	helpTicketURL           string // url to the help ticketing system
-	idp                     string // ex: okta, onelogin
-	init                    bool   // initialize the program and wait for input.
-	logLevel                string // ex: debug, trace, info, warn, error
-	logToFile               bool   // log to file defaults to false
-	mdm                     string // ex: jamf, kandji
-	pollInterval            int    // how often to poll for reminders
-	requiredVers            string // ex: 13.1
-	rebuildTablesOnFailure  bool   // rebuild tables on an abnormal exit.
-	sendManagerMissing      bool   // send a message to the alert channel of missing managers
-	serviceName             string // ex: cuebert
-	tableNames              string // comma separated list of tables to clear
-	testing                 bool   // run in testing mode
-	testingEndTime          string // the hour the messaging should end
-	testingStartTime        string // the hour the messaging should start
-	testingUsers            string // comma separated list of users to test with
-}
+	envArgs := os.Args[0:]
 
-// TODO: this needs to log the bot flags via an interface
-func (c *Cuebert) logFlags() {
-	c.log.Trace().
-		Str("authUsers", c.flags.authUsers).
-		Bool("authUsersFromIDP", c.flags.authUsersFromIDP).
-		Int("checkInterval", c.flags.checkInterval).
-		Bool("clearTables", c.flags.clearTables).
-		Str("cutoffTime", c.flags.cutoffTime).
-		Bool("dailyReport", c.flags.dailyReport).
-		Str("deadline", c.flags.deadline).
-		Int("deviceDiffInterval", c.flags.deviceDiffInterval).
-		Str("envType", c.flags.envType).
-		Str("helpDocsURL", c.flags.helpDocsURL).
-		Str("helpRepoURL", c.flags.helpRepoURL).
-		Str("helpTicketURL", c.flags.helpTicketURL).
-		Str("idp", c.flags.idp).
-		Bool("init", c.flags.init).
-		Str("tableNames", c.flags.tableNames).
-		Str("logLevel", c.flags.logLevel).
-		Bool("logToFile", c.flags.logToFile).
-		Str("mdm", c.flags.mdm).
-		Int("pollInterval", c.flags.pollInterval).
-		Str("requiredVersion", c.flags.requiredVers).
-		Bool("rebuildTablesOnFailure", c.flags.rebuildTablesOnFailure).
-		Bool("sendManagerMissing", c.flags.sendManagerMissing).
-		Str("serviceName", c.flags.serviceName).
-		Str("tableNames", c.flags.tableNames).
-		Bool("testing", c.flags.testing).
-		Str("testingEndTime", c.flags.testingEndTime).
-		Str("testingStartTime", c.flags.testingStartTime).
-		Str("testingUsers", c.flags.testingUsers).
-		Msg("current configuration")
+	log := logger.New(
+		&logger.Config{
+			ToFile:  f.LogToFile,
+			Level:   f.LogLevel,
+			Service: f.ServiceName,
+			Env:     f.EnvType,
+		},
+	)
+
+	var cfg config.Config
+	err := yae.Get(
+		yae.EnvType(f.EnvType),
+		&yae.Env{
+			EnvPrefix:    "CUEBERT",
+			ConfigStruct: &cfg,
+			Type:         yae.JSON,
+		},
+	)
+	if err != nil {
+		log.Info().AnErr("error", err).Msg("no config found, exiting")
+		os.Exit(1)
+	}
+
+	config := &Cuebert{
+		flags:  f,
+		log:    log,
+		config: &cfg,
+	}
+
+	if f.Testing {
+		if f.TestingUsers != "" {
+			userSlice := strings.Split(f.TestingUsers, ",")
+			config.flags.TestUsers = append(config.flags.TestUsers, userSlice...)
+		}
+	}
+
+	if testDBConn {
+		_, _ = dbConn(config, true)
+	}
+	return config, envArgs
 }

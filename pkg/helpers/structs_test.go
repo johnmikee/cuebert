@@ -1,9 +1,10 @@
-package helpers
+package helpers_test
 
 import (
-	"fmt"
 	"reflect"
 	"testing"
+
+	"github.com/johnmikee/cuebert/pkg/helpers"
 )
 
 type TestStruct struct {
@@ -19,7 +20,7 @@ type TestStruct struct {
 
 func TestGetStructKeys(t *testing.T) {
 	expectedKeys := []string{"field_1", "field_2", "field_3", "field_6"}
-	result := GetStructKeys(TestStruct{})
+	result := helpers.GetStructKeys(TestStruct{})
 
 	if len(result) != len(expectedKeys) {
 		t.Errorf("Test case failed: expected %d keys, got %d keys: %v", len(expectedKeys), len(result), result)
@@ -43,12 +44,11 @@ func TestGetStructKeys(t *testing.T) {
 	}
 
 	expectedKeys = []string{"id", "username", "email"}
-	keys := GetStructKeys(user)
+	keys := helpers.GetStructKeys(user)
 
 	if !reflect.DeepEqual(keys, expectedKeys) {
 		t.Errorf("Test case failed: expected keys %v, got %v", expectedKeys, keys)
 	}
-
 }
 
 func containsTag(tags []string, key string) bool {
@@ -75,8 +75,7 @@ func TestGetFieldName(t *testing.T) {
 	}
 
 	expectedFieldName := "Username"
-	fieldName, err := GetFieldName("username", user)
-
+	fieldName, err := helpers.GetFieldName("username", user)
 	if err != nil {
 		t.Errorf("Test case failed: unexpected error: %v", err)
 	}
@@ -85,16 +84,11 @@ func TestGetFieldName(t *testing.T) {
 		t.Errorf("Test case failed: expected field name %s, got %s", expectedFieldName, fieldName)
 	}
 
-	// Test case: Invalid type (not a struct)
+	// Test case: Invalid type (not a struct or a pointer to a struct)
 	var invalidStruct []int
-	fmt.Printf("Type of invalidStruct: %T\n", invalidStruct) // Print the type for debugging
-	invalidFieldName, err := GetFieldName("tag", invalidStruct)
+	expectedErrorMessage := "expected a struct or a pointer to struct, got slice"
+	_, err = helpers.GetFieldName("tag", invalidStruct)
 
-	if invalidFieldName != "" {
-		t.Errorf("Test case failed: expected empty field name, got %s", invalidFieldName)
-	}
-
-	expectedErrorMessage := "could not get field name"
 	if err == nil || err.Error() != expectedErrorMessage {
 		t.Errorf("Test case failed: expected error message '%s', got '%v'", expectedErrorMessage, err)
 	}
@@ -119,38 +113,9 @@ func TestGetTagMapping(t *testing.T) {
 		"address": "Address",
 	}
 
-	tagMapping := GetTagMapping(reflect.TypeOf(Person{}))
+	tagMapping := helpers.GetTagMapping(reflect.TypeOf(Person{}))
 
 	if !reflect.DeepEqual(tagMapping, expectedTagMapping) {
 		t.Errorf("Test case failed: expected tag mapping %v, got %v", expectedTagMapping, tagMapping)
-	}
-}
-
-func TestBuildFieldsByTagMap(t *testing.T) {
-	type User struct {
-		ID       int    `json:"-"`
-		Username string `json:"username"`
-		Email    string `json:"email,omitempty"`
-		Password string `json:",omitempty"`
-	}
-
-	user := User{
-		ID:       1,
-		Username: "john_doe",
-		Email:    "john.doe@example.com",
-		Password: "secret",
-	}
-
-	buildFieldsByTagMap(user)
-
-	expectedFields := map[string]map[string]string{
-		keyType: {
-			"username": "Username",
-			"email":    "Email",
-		},
-	}
-
-	if !reflect.DeepEqual(fieldsByTag[reflect.TypeOf(user)], expectedFields) {
-		t.Errorf("Test case failed: expected fields map %v, got %v", expectedFields, fieldsByTag[reflect.TypeOf(user)])
 	}
 }

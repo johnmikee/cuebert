@@ -23,16 +23,15 @@ type Provider interface {
 	GetUsers(opts *QueryOpts) ([]User, error)
 }
 
+// Config is the struct that is used to configure the MDM client.
 type Config struct {
-	// Common configuration fields
-	Domain   string        `json:"domain,omitempty"`
-	MDM      MDM           `json:"mdm,omitempty"`
-	URL      string        `json:"url,omitempty"`
-	User     string        `json:"user,omitempty"`
-	Password string        `json:"password,omitempty"`
-	Token    string        `json:"token,omitempty"`
-	Client   *http.Client  `json:"client,omitempty"`
-	Log      logger.Logger `json:"log,omitempty"`
-	// Provider-specific configuration fields
-	ProviderSpecificConfig interface{} `json:"provider_specific_config,omitempty"`
+	Domain                 string        `json:"domain,omitempty"`
+	MDM                    MDM           `json:"mdm,omitempty"`
+	URL                    string        `json:"url,omitempty"`
+	User                   string        `json:"user,omitempty"`
+	Password               string        `json:"password,omitempty"`
+	Token                  string        `json:"token,omitempty"`
+	Client                 *http.Client  `json:"client,omitempty"`
+	Log                    logger.Logger `json:"log,omitempty"`
+	ProviderSpecificConfig interface{}   `json:"provider_specific_config,omitempty"`
 }

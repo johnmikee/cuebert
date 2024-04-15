@@ -3,90 +3,114 @@ package main
 import (
 	"os"
 	"os/signal"
+	"runtime"
+	"sync/atomic"
 	"syscall"
+	"time"
 
-	"github.com/johnmikee/cuebert/cuebert/handlers"
-	"github.com/johnmikee/cuebert/db/create"
+	"github.com/johnmikee/cuebert/bot"
+	"github.com/johnmikee/cuebert/bot/lifecycle"
+	"github.com/johnmikee/cuebert/cuebert/config"
+	"github.com/johnmikee/cuebert/cuebert/task"
+	"github.com/johnmikee/cuebert/db"
+	dbc "github.com/johnmikee/cuebert/db/config"
+	"github.com/johnmikee/cuebert/db/migrations"
+	"github.com/johnmikee/cuebert/handlers"
+	"github.com/johnmikee/cuebert/pkg/logger"
+	"go.uber.org/automaxprocs/maxprocs"
 )
+
+// Cuebert is a struct to hold config for the program
+type Cuebert struct {
+	bot           *bot.Bot
+	db            db.Client
+	dbConfig      *dbc.Config
+	config        *config.Config
+	flags         *config.Flags
+	log           logger.Logger
+	lifecyle      *lifecycle.Client
+	task          task.Rabbit
+	statusChan    chan handlers.StatusMessage
+	statusHandler *handlers.StatusHandler
+	running       int32 // used for atomic operations
+}
 
 func main() {
 	c := setup()
-	// suppress slacker logs
-	os.Stdout = nil
 
-	c.log.Info().Msg("cuebert time!")
-
-	c.log.Info().Msg("starting health handler...")
-	go c.statusHandler.StartHealthHandler()
-
-	if c.flags.dailyReport {
-		err := c.bot.SendDailyAdminReport()
-		status := c.statusHandler.GetStatus()
+	if c.flags.MakeMigrations {
+		err := migrations.MakeEmbed(c.db.GetConnStr())
 		if err != nil {
-			c.log.Err(err).Msg("could not send daily report")
-			status.DailyReport = &handlers.BotStatus{
-				Message: "could not send daily report",
-				Error:   err,
-			}
+			c.log.Fatal().AnErr("error", err).Msg("could not run migrations")
 		}
-		status.DailyReport = &handlers.BotStatus{
-			Message: "daily report sent",
-			Error:   nil,
-		}
-		c.statusHandler.SetStatus(status)
+		c.log.Debug().Msg("migrations complete")
 		os.Exit(0)
 	}
+	if runtime.GOOS == "linux" { // set GOMAXPROCS to match Linux container CPU quota on Linux.
+		if _, err := maxprocs.Set(maxprocs.Logger(c.log.Printf)); err != nil {
+			c.log.Error().Msg("cannot set GOMAXPROCS")
+		}
+	}
+	c.log.Info().Msg("cuebert starting...")
+
+	go handlers.StartHandlers(c.task.SetupReportHandler())
 
 	// send cuebert off to handle questions
 	go c.bot.Respond()
-	// wait for a signal to start
-	go c.handler()
+	go c.monitor() // wait for a signal to start
 
-	if !c.flags.init {
-		c.start()
-	} else {
-		var check []string
-		if c.flags.rebuildTablesOnFailure {
-			c.log.Info().Msg("building tables")
-			err := create.Build(c.db, &c.log)
-			if err != nil {
-				c.log.Err(err).Msg("could not build tables")
-				os.Exit(3)
-			}
-			c.log.Info().Msg("initializing tables")
-			check, err = c.tables.InitTables(c.flags.requiredVers)
-			if err != nil {
-				c.log.Err(err).Msg("could not initialize tables")
-				os.Exit(3)
-			}
-		}
-		go c.method.PostCheck(check)
+	err := c.task.Populate(time.Now())
+	if err != nil {
+		c.log.Info().AnErr("error", err).Msg("could not populate tracking table")
+	}
+	c.task.Diff(time.Now())
+
+	go c.doEvery((15 * time.Minute), c.task.Diff, true)
+
+	if err != nil {
+		c.log.Info().AnErr("error", err).Msg("could not populate tracking table")
 	}
 
-	quitChannel := make(chan os.Signal, 1)
+	if !c.flags.Init {
+		c.lifecyle.Start()
+	}
+	quitChannel := make(chan os.Signal, 1) // sized channel to avoid blocking
 	signal.Notify(quitChannel, syscall.SIGINT, syscall.SIGTERM)
-	<-quitChannel
 
+	<-quitChannel
+	c.log.Info().Msg("received signal to quit")
+	atomic.StoreInt32(&c.running, 0)
+	c.lifecyle.Stop()
 	c.log.Info().Msg("cuebye!")
 }
 
 // control when we start and stop the main routines for the program
-func (c *Cuebert) handler() {
+func (c *Cuebert) monitor() {
 	c.log.Info().Msg("starting routine handler...")
-	// Wait for start or stop signal
+	// wait for start, stop, or reload signals from the lifecycle system
 	for {
 		select {
-		case <-c.reloadSignal:
+		case <-c.lifecyle.ReloadSignal():
 			c.log.Info().Msg("updating config")
-			go c.reloadFlags()
-		case <-c.startSignal:
-			// Start executing subsequent functions
-			c.log.Info().Msg("starting routines")
-			go c.run()
-		case <-c.stopSignal:
-			// Stop executing subsequent functions and wait for start signal again
-			c.log.Info().Msg("stopping routines")
-			c.isRunning = false
+			go func() {
+				config.LogFlags(c.log, c.flags)
+				c.lifecyle.Update() // trigger an update in the lifecycle system.
+			}()
+
+		case <-c.lifecyle.StartSignal():
+			if atomic.CompareAndSwapInt32(&c.running, 0, 1) { // ensure not already running
+				c.lifecyle.Start()
+				c.log.Info().Msg("starting routines")
+				go config.LogFlags(c.log, c.flags)
+				go c.run() // start the main application routine.
+			}
+
+		case <-c.lifecyle.StopSignal():
+			if atomic.CompareAndSwapInt32(&c.running, 1, 0) { // ensure it's currently running
+				c.lifecyle.Stop()
+				c.log.Info().Msg("stopping routines")
+				// we can add logic to wait for routines to clean up before completely stopping.
+			}
 		}
 	}
 }

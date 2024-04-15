@@ -102,8 +102,7 @@ func LocaleDiff(offset int64, d, t string) (time.Duration, error) {
 	return diff, nil
 }
 
-// getReminderDay returns the next Wednesday. this is used to send the reminder to
-// the manager.
+// getReminderDay returns the next Wednesday.
 func GetReminderDay() time.Time {
 	now := time.Now()
 	weekday := int(now.Weekday())

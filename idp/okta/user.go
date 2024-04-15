@@ -1,7 +1,6 @@
 package okta
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 	"time"
@@ -9,8 +8,11 @@ import (
 	"github.com/johnmikee/cuebert/idp"
 )
 
-// UserResponse holds information on the user returned when querying the /users endpoint
-type UserResponse struct {
+// UserResponse is a slice of User responses returned when querying the /users endpoint
+type UserResponse []User
+
+// User holds information on the user returned when querying the /users endpoint
+type User struct {
 	ID              string    `json:"id"`
 	Status          string    `json:"status"`
 	Created         time.Time `json:"created"`
@@ -44,95 +46,87 @@ type UserOpts struct {
 	LoginShortname string
 }
 
-func (o *Client) userOptSorter(u *UserOpts) (string, bool) {
-	// we only need one of these passed. if the count is over 1 we will
-	// go in order of id, shortname, and then login as the return and log
-	// a warning.
-	count := 0
-	var user string
-
-	if u.ID != "" {
-		user = u.ID
-		count++
-	}
-	if u.LoginShortname != "" {
-		user = userNameChecker(u.LoginShortname, o.domain)
-		count++
-	}
-	if u.Login != "" {
-		user = userNameChecker(u.Login, o.domain)
-		count++
-	}
-
-	if count > 1 {
-		o.log.Warn().Msg("only one option should be passed to GetUser from UserOpts.")
-		o.log.Debug().Msgf(
-			"the following values were passed - ID: %s, Login: %s, LoginShortname: %s", u.ID, u.Login, u.LoginShortname)
-	}
-
-	if user == "" {
-		return user, false
-	}
-
-	return user, true
+// GetAllUsers returns a slice of users formatted for the IDP interface.
+func (c *Client) GetAllUsers() (idp.UI, error) {
+	return c.getAllUsers()
 }
 
-// GetUser will return a UserResponse body for the user queried against.
-// user:
-//   - when querying a user you must pass either the id, login, or loginshortname.
-//     this function takes all three options and will be sorted by the userOptSorter
-//     function.
-func (o *Client) GetUser(user *UserOpts) (*UserResponse, *http.Response, error) {
-	u, ok := o.userOptSorter(user)
-	if !ok {
-		msg := "could not generate user query"
-		return nil, nil, errors.New(msg)
-	}
-
-	url := fmt.Sprintf("users/%s", u)
-
-	req, err := o.newRequest(http.MethodGet, url, nil, nil)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	var userRes UserResponse
-	resp, err := o.do(req, &userRes)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	return &userRes, resp, nil
+// GetUser returns a single user formatted for the IDP interface.
+func (c *Client) GetUser(user string) (*idp.User, error) {
+	return c.getUser(user)
 }
 
-func (o *Client) getActive(u *urlOverride) (*http.Response, []UserResponse, error) {
-	url := `users?filter=status+eq+%22ACTIVE%22`
+func (o *Client) user(user string) (*User, error) {
+	url := fmt.Sprintf("users/%s", user)
 
-	if u.override {
-		url = u.url
+	req, err := o.newRequest(http.MethodGet, url, false, nil)
+	if err != nil {
+		return nil, err
 	}
-	req, err := o.newRequest(http.MethodGet, url, u, nil)
 
+	var userRes User
+	_, err = o.do(req, &userRes)
+	if err != nil {
+		return nil, err
+	}
+
+	return &userRes, nil
+}
+
+func (o *Client) getUser(user string) (*idp.User, error) {
+	url := fmt.Sprintf("users/%s", user)
+
+	req, err := o.newRequest(http.MethodGet, url, false, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var userRes User
+	_, err = o.do(req, &userRes)
+	if err != nil {
+		return nil, err
+	}
+
+	iu := idp.User{
+		ID: userRes.ID,
+		Profile: idp.Profile{
+			LastName:  userRes.Profile.LastName,
+			Manager:   userRes.Profile.Manager,
+			ManagerID: userRes.Profile.ManagerID,
+			Title:     userRes.Profile.Title,
+			Login:     userRes.Profile.Login,
+			FirstName: userRes.Profile.FirstName,
+			UserType:  user,
+			Email:     userRes.Profile.Email,
+			StartDate: userRes.Profile.StartDate,
+		},
+	}
+
+	return &iu, nil
+}
+
+func (o *Client) getActive(url string, override bool) (*http.Response, UserResponse, error) {
+	req, err := o.newRequest(http.MethodGet, url, override, nil)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	var ur []UserResponse
+	var ur UserResponse
 	resp, err := o.do(req, &ur)
 	if err != nil {
-		return resp, nil, err
+		return nil, nil, err
 	}
 
 	return resp, ur, nil
 }
 
-// GetAllOktaUsers will return an array of all active Okta users
-func (o *Client) getAllUsers() ([]idp.User, error) {
+func (o *Client) getAllUsers() (idp.UI, error) {
 	results := []idp.User{}
 
-	u := &urlOverride{override: false}
+	var override bool
+	url := "users?filter=status+eq+%22ACTIVE%22"
 	for {
-		resp, ur, err := o.getActive(u)
+		resp, ur, err := o.getActive(url, override)
 		if err != nil {
 			return nil, err
 		}
@@ -167,10 +161,10 @@ func (o *Client) getAllUsers() ([]idp.User, error) {
 			o.log.Trace().Msg("no more responses from okta")
 			break
 		}
-		u.override = true
-		u.url = link
-		o.log.Trace().Msg("checking next link..")
 
+		url = link
+		override = true
+		o.log.Trace().Msg("checking next link..")
 	}
 
 	return results, nil

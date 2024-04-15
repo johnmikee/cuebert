@@ -1,53 +1,72 @@
 package kandji
 
 import (
-	"bytes"
-	"encoding/json"
-	"fmt"
-	"io"
 	"net/http"
-	"strings"
-
-	"github.com/pkg/errors"
+	"strconv"
 
 	"github.com/johnmikee/cuebert/mdm"
 	"github.com/johnmikee/cuebert/pkg/helpers"
 	"github.com/johnmikee/cuebert/pkg/logger"
+	"github.com/johnmikee/cuebert/pkg/requester"
 )
 
+// Config stores the config needed to interact with the Kandji API.
 type Config struct {
+	Token   string
+	BaseURL string
+	Client  *http.Client
+	Log     *logger.Logger
+}
+
+// Client represents the Kandji API client
+type Client struct {
 	token   string
 	baseURL string
-
-	client *http.Client
-	log    logger.Logger
+	client  *http.Client
+	log     logger.Logger
 }
 
 // Setup implements mdm.Provider.
-func (c *Config) Setup(m mdm.Config) {
-	c.token = helpers.TokenValidator(m.Token, "Bearer")
-	c.baseURL = helpers.URLShaper(m.URL, "api/v1/")
-	c.client = httpClient(m.Client)
+func (c *Client) Setup(m mdm.Config) {
+	c.client = m.Client
 	c.log = logger.ChildLogger("kandji", &m.Log)
+	c.baseURL = helpers.URLShaper(m.URL, "api/v1/")
+	c.token = helpers.TokenValidator(m.Token, "Bearer")
 }
 
-// GetDevice implements mdm.Provider.
-func (c *Config) GetDevice(deviceID string) (*mdm.Device, error) {
-	return c.GetDeviceDetails(deviceID)
+// GetDevice returns a device from the Kandji API.
+//
+//	func (c *Client) GetDevice(deviceID string) (*mdm.Device, error) {
+//		return c.GetDeviceDetails(deviceID)
+//	}
+func (c *Client) GetDevice(deviceID string) (*mdm.Device, error) {
+	dg, err := c.getDevice(deviceID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &mdm.Device{
+		DeviceID:        dg.DeviceID,
+		DeviceName:      dg.DeviceName,
+		Model:           dg.Model,
+		SerialNumber:    dg.SerialNumber,
+		Platform:        dg.Platform,
+		OSVersion:       dg.OsVersion,
+		LastCheckIn:     &dg.LastCheckIn,
+		AssetTag:        dg.AssetTag,
+		FirstEnrollment: dg.FirstEnrollment,
+		LastEnrollment:  dg.LastEnrollment,
+		User: mdm.User{
+			Email: dg.User.Email,
+			Name:  dg.User.Name,
+			ID:    strconv.Itoa(dg.User.ID),
+		},
+	}, nil
 }
 
-// ListDevices implements mdm.Provider.
-func (c *Config) ListDevices() ([]mdm.Device, error) {
+// ListDevices returns a slice of devices formatted for the MDM interface.
+func (c *Client) ListDevices() ([]mdm.Device, error) {
 	return c.ListAllDevices()
-}
-
-// Client stores the config needed to interact with the Kandji API.
-type Client struct {
-	Token   string
-	BaseURL string
-
-	Client *http.Client
-	Log    *logger.Logger
 }
 
 type offsetRange struct {
@@ -56,57 +75,28 @@ type offsetRange struct {
 }
 
 // NewClient returns a pointer with the Client after validating the arguments passedev[i].
-func NewClient(c *Client) *Config {
-	return &Config{
+func NewClient(c *Config) *Client {
+	return &Client{
 		token:   helpers.TokenValidator(c.Token, "Bearer"),
 		baseURL: helpers.URLShaper(c.BaseURL, "api/v1/"),
-		client:  httpClient(c.Client),
+		client:  c.Client,
 		log:     logger.ChildLogger("kandji", c.Log),
 	}
 }
 
-func httpClient(c *http.Client) *http.Client {
-	if c != nil {
-		return c
-	}
-
-	return &http.Client{}
+func (c *Client) newRequest(url string) (*http.Request, error) {
+	return requester.New("GET", c.baseURL, url, false, nil)
 }
 
-func (c *Config) newRequest(method, url string, body interface{}) (*http.Request, error) {
-	var buf bytes.Buffer
-
-	u := fmt.Sprintf("%s%s", c.baseURL, strings.TrimPrefix(url, "/"))
-
-	if body != nil {
-		if err := json.NewEncoder(&buf).Encode(body); err != nil {
-			c.log.Err(err).Msg("error encoding payload body")
-			return nil, err
-		}
-	}
-	req, err := http.NewRequest(method, u, &buf)
-	if err != nil {
-		return nil, err
-	}
-
+func (c *Client) headers(req *http.Request) {
 	req.Header.Set("Authorization", c.token)
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Content-type", "application/json;charset=utf-8")
-	return req, nil
 }
 
-func (c *Config) do(req *http.Request) (*http.Response, error) {
-	resp, err := c.client.Do(req)
-	if err != nil {
-		return resp, err
-	}
-
-	if resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(resp.Body)
-		return resp, errors.Errorf("error during request. status code=%d error: %s", resp.StatusCode, string(body))
-	}
-
-	return resp, nil
+func (c *Client) do(req *http.Request, v interface{}) (*http.Response, error) {
+	c.headers(req)
+	return requester.Do(c.client, req, v)
 }
 
 func transform(dev DeviceResults) mdm.DeviceResults {
@@ -120,7 +110,7 @@ func transform(dev DeviceResults) mdm.DeviceResults {
 			SerialNumber:    dev[i].SerialNumber,
 			Platform:        dev[i].Platform,
 			OSVersion:       dev[i].OSVersion,
-			LastCheckIn:     dev[i].LastCheckIn,
+			LastCheckIn:     kandjiTimeFixer(dev[i].LastCheckIn),
 			User:            setMDMUser(dev[i].User),
 			AssetTag:        dev[i].AssetTag,
 			FirstEnrollment: dev[i].FirstEnrollment,

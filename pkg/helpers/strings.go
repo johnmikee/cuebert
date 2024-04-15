@@ -40,19 +40,25 @@ type InvalidSemVerError struct {
 	message string
 }
 
+func (e InvalidSemVerError) Message(m string) InvalidSemVerError {
+	e.message = m
+	return e
+}
+
 func (e InvalidSemVerError) Error() string {
 	return e.message
 }
 
 // CompareOSVer compares the reported OS string to the required.
-// The version to check should be the first arg and the required
-// version should be the second.
-func CompareOSVer(a, b string) (bool, error) {
-	uv, err := vers.NewVersion(a)
+// The reported version to check should be the first parameter and the required version should be the second.
+//
+// Returns false if the reported version is less than the required version.
+func CompareOSVer(reported, required string) (bool, error) {
+	uv, err := vers.NewVersion(reported) // user or reported version
 	if err != nil {
 		return false, InvalidSemVerError{"Invalid semantic version"}
 	}
-	rv, err := vers.NewVersion(b)
+	rv, err := vers.NewVersion(required) // required version
 	if err != nil {
 		return false, InvalidSemVerError{"Invalid semantic version"}
 	}

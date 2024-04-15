@@ -15,6 +15,10 @@ const (
 
 var tmpPath = filepath.Join(os.TempDir(), "visual")
 
+func Build(input string, output *string, visType VisualType, buf []byte) (string, error) {
+	return buildOut(input, output, visType, buf)
+}
+
 func buildOut(input string, output *string, visType VisualType, buf []byte) (string, error) {
 	var createPath string
 	if output != nil {
@@ -23,13 +27,13 @@ func buildOut(input string, output *string, visType VisualType, buf []byte) (str
 		createPath = tmpPath
 	}
 
-	err := os.MkdirAll(createPath, 0700)
+	err := os.MkdirAll(createPath, 0o700)
 	if err != nil {
 		return tmpPath, err
 	}
 
 	file := filepath.Join(tmpPath, fmt.Sprintf("%s-%s.png", input, visType))
-	err = os.WriteFile(file, buf, 0600)
+	err = os.WriteFile(file, buf, 0o600)
 
 	return file, err
 }

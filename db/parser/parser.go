@@ -2,6 +2,7 @@ package parser
 
 import (
 	"fmt"
+	"reflect"
 	"sort"
 	"time"
 	"unicode/utf8"
@@ -15,7 +16,7 @@ import (
 type Parser struct {
 	Index  string
 	Table  string
-	Val    string
+	Val    any
 	Check  []CheckInfo
 	Method Method
 	Into   interface{}
@@ -65,6 +66,41 @@ func (a nameSortedCheck) Swap(i, j int) {
 	a[i], a[j] = a[j], a[i]
 }
 
+func ExtractCheckInfo(info interface{}) []CheckInfo {
+	check := make([]CheckInfo, 0)
+	infoValue := reflect.ValueOf(info)
+	infoType := infoValue.Type()
+
+	for i := 0; i < infoType.NumField(); i++ {
+		field := infoType.Field(i)
+		fieldValue := infoValue.Field(i)
+
+		if !fieldValue.IsZero() {
+			c := CheckInfo{
+				Key:     field.Tag.Get("json"),
+				Trimmed: field.Name,
+			}
+
+			switch fieldValue.Kind() {
+			case reflect.String:
+				c.Fn.S = fieldValue.Interface().(string)
+			case reflect.Int:
+				c.Fn.I = int(fieldValue.Int())
+			case reflect.Int64:
+				c.Fn.I64 = fieldValue.Int()
+			case reflect.Bool:
+				c.Fn.B = fieldValue.Bool()
+			case reflect.Struct:
+				c.Fn.T = fieldValue.Interface().(time.Time)
+			}
+
+			check = append(check, c)
+		}
+	}
+
+	return check
+}
+
 // ParseInput will take the input provided by the user via the table action methods
 // and compose a sql query to be executed.
 //
@@ -92,7 +128,6 @@ func ParseInput(p *Parser) (string, []interface{}, error) {
 	base := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
 
 	sql, args, err := p.builder(base)
-
 	if err != nil {
 		return sql, args, fmt.Errorf("sql generation failed %w", err)
 	}

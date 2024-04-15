@@ -1,9 +1,11 @@
-package helpers
+package helpers_test
 
 import (
 	"encoding/json"
 	"errors"
 	"testing"
+
+	"github.com/johnmikee/cuebert/pkg/helpers"
 )
 
 func TestCompareOSVer(t *testing.T) {
@@ -17,12 +19,14 @@ func TestCompareOSVer(t *testing.T) {
 		{"1.2.3", "1.2.3", true, nil},
 		{"1.2.4", "1.2.3", true, nil},
 		{"1.2.3", "2.0.0", false, nil},
-		{"invalid", "1.2.3", false, InvalidSemVerError{"Invalid semantic version"}},
-		{"9.5.6", "4fg4:.3", false, InvalidSemVerError{"Invalid semantic version"}},
+		{"14.2.1", "13.4.2", true, nil},
+		{"13.2.1", "14.2.1", false, nil},
+		{"invalid", "1.2.3", false, helpers.InvalidSemVerError{}.Message("Invalid semantic version")},
+		{"9.5.6", "4fg4:.3", false, helpers.InvalidSemVerError{}.Message("Invalid semantic version")},
 	}
 
 	for _, testCase := range testCases {
-		result, err := CompareOSVer(testCase.a, testCase.b)
+		result, err := helpers.CompareOSVer(testCase.a, testCase.b)
 
 		if result != testCase.expectedResult {
 			t.Errorf("Test case failed: a=%s, b=%s, expected result=%v, got=%v", testCase.a, testCase.b, testCase.expectedResult, result)
@@ -44,14 +48,14 @@ func TestContains(t *testing.T) {
 	}
 
 	exists := "Macintosh 128K"
-	result := Contains(slice, exists)
+	result := helpers.Contains(slice, exists)
 	if !result {
 		t.Errorf("Test case failed: expected %s to be found in slice", exists)
 	}
 
 	// Test case: element does not exist in the slice
 	notExists := "Macbook Pro"
-	result = Contains(slice, notExists)
+	result = helpers.Contains(slice, notExists)
 	if result {
 		t.Errorf("Test case failed: unexpected %s found in slice", notExists)
 	}
@@ -63,7 +67,7 @@ func TestContainsPosition(t *testing.T) {
 	// Test case: element exists in the slice
 	exists := "salt"
 	expectedIndex := 4
-	resultIndex, result := ContainsPosition(slice, exists)
+	resultIndex, result := helpers.ContainsPosition(slice, exists)
 	if !result {
 		t.Errorf("Test case failed: expected %s to be found in slice", exists)
 	}
@@ -74,7 +78,7 @@ func TestContainsPosition(t *testing.T) {
 	// Test case: element does not exist in the slice
 	notExists := "jamf"
 	expectedIndex = 0
-	resultIndex, result = ContainsPosition(slice, notExists)
+	resultIndex, result = helpers.ContainsPosition(slice, notExists)
 	if result {
 		t.Errorf("Test case failed: unexpected %s found in slice", notExists)
 	}
@@ -97,7 +101,7 @@ func TestPossessiveForm(t *testing.T) {
 	}
 
 	for _, testCase := range testCases {
-		result := PossessiveForm(testCase.name)
+		result := helpers.PossessiveForm(testCase.name)
 		if result != testCase.expectedResult {
 			t.Errorf("Test case failed: name=%s, expected=%s, got=%s", testCase.name, testCase.expectedResult, result)
 		}
@@ -109,7 +113,7 @@ func TestRemove(t *testing.T) {
 	index := 2 // Index of "macOS" to be removed
 	expectedResult := []string{"Gopher", "banana", "date", "Golang"}
 
-	result := Remove(slice, index)
+	result := helpers.Remove(slice, index)
 
 	if len(result) != len(expectedResult) {
 		t.Errorf("Test case failed: expected length=%d, got=%d", len(expectedResult), len(result))
@@ -123,7 +127,7 @@ func TestRemove(t *testing.T) {
 }
 
 func TestInvalidSemVerError_Error(t *testing.T) {
-	err := InvalidSemVerError{"Invalid semantic version"}
+	err := helpers.InvalidSemVerError{}.Message("Invalid semantic version")
 	expectedResult := "Invalid semantic version"
 	result := err.Error()
 
@@ -136,7 +140,7 @@ func TestRemoveEmpty(t *testing.T) {
 	slice := []string{"iOS 12", "", "macOS Catalina", "", "", "watchOS 7", "tvOS 14", "", "macOS Big Sur"}
 	expectedResult := []string{"iOS 12", "macOS Catalina", "watchOS 7", "tvOS 14", "macOS Big Sur"}
 
-	result := RemoveEmpty(slice)
+	result := helpers.RemoveEmpty(slice)
 
 	if len(result) != len(expectedResult) {
 		t.Errorf("Test case failed: expected length=%d, got=%d", len(expectedResult), len(result))
@@ -164,7 +168,7 @@ func TestRespToJson(t *testing.T) {
 
 	expectedResult := `{"Name":"Glen(da) Jr.","Message":"Look, that rabbit's got a vicious streak a mile wide! It's a killer!","Birthday":"Tuesday, November 10, 2009"}`
 
-	result := RespToJson(gopher)
+	result := helpers.RespToJson(gopher)
 
 	if result != expectedResult {
 		t.Errorf("Test case failed: expected %s, got %s", expectedResult, result)
@@ -174,7 +178,7 @@ func TestRespToJson(t *testing.T) {
 	invalidStruct := make(chan int) // Invalid struct that cannot be marshaled to JSON
 
 	expectedError := errors.New("unexpected end of JSON input")
-	result = RespToJson(invalidStruct)
+	result = helpers.RespToJson(invalidStruct)
 
 	if result != "" {
 		t.Errorf("Test case failed: expected empty string, got %s", result)
@@ -188,5 +192,4 @@ func TestRespToJson(t *testing.T) {
 	} else if err.Error() != expectedError.Error() {
 		t.Errorf("Test case failed: expected error=%v, got %v", expectedError, err.Error())
 	}
-
 }

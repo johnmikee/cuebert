@@ -1,15 +1,15 @@
-package helpers
+package helpers_test
 
 import (
 	"testing"
 
-	"github.com/slack-go/slack"
+	"github.com/johnmikee/cuebert/pkg/helpers"
 )
 
 func TestExtractEmails(t *testing.T) {
 	message := "Please send an email to john.doe@example.com"
 	expected := "john.doe@example.com"
-	email := ExtractEmails(message)
+	email := helpers.ExtractEmails(message)
 	if email != expected {
 		t.Errorf("Expected email: %s, but got: %s", expected, email)
 	}
@@ -18,7 +18,7 @@ func TestExtractEmails(t *testing.T) {
 func TestTzStringer(t *testing.T) {
 	tz := int64(-300)
 	expected := "-300"
-	tzStr := TZStringer(tz)
+	tzStr := helpers.TZStringer(tz)
 	if tzStr != expected {
 		t.Errorf("Expected tz string: %s, but got: %s", expected, tzStr)
 	}
@@ -27,7 +27,7 @@ func TestTzStringer(t *testing.T) {
 func TestStringBooler(t *testing.T) {
 	boolStr := "true"
 	expected := true
-	b := StringBooler(boolStr)
+	b := helpers.StringBooler(boolStr)
 	if b != expected {
 		t.Errorf("Expected bool value: %t, but got: %t", expected, b)
 	}
@@ -36,7 +36,7 @@ func TestStringBooler(t *testing.T) {
 func TestYnToBool(t *testing.T) {
 	ynStr := "Yes"
 	expected := true
-	boolVal := YNToBool(ynStr)
+	boolVal := helpers.YNToBool(ynStr)
 	if boolVal != expected {
 		t.Errorf("Expected bool value: %t, but got: %t", expected, boolVal)
 	}
@@ -45,20 +45,16 @@ func TestYnToBool(t *testing.T) {
 func TestValToInt(t *testing.T) {
 	numStr := "42"
 	expected := 42
-	num := ValToInt(numStr)
+	num := helpers.ValToInt(numStr)
 	if num != expected {
 		t.Errorf("Expected integer value: %d, but got: %d", expected, num)
 	}
 }
 
 func TestOptsToStrs(t *testing.T) {
-	opts := []slack.OptionBlockObject{
-		{Value: "Option 1"},
-		{Value: "Option 2"},
-		{Value: "Option 3"},
-	}
+	opts := []string{"Option 1", "Option 2", "Option 3"}
 	expected := "Option 1,Option 2,Option 3"
-	str := OptsToStrs(opts)
+	str := helpers.OptsToStrs(opts)
 	if str != expected {
 		t.Errorf("Expected string: %s, but got: %s", expected, str)
 	}
@@ -67,7 +63,7 @@ func TestOptsToStrs(t *testing.T) {
 func TestUsersToStrs(t *testing.T) {
 	users := []string{"user1", "user2", "user3"}
 	expected := "user1,user2,user3"
-	userStr := UsersToStrs(users)
+	userStr := helpers.UsersToStrs(users)
 	if userStr != expected {
 		t.Errorf("Expected user string: %s, but got: %s", expected, userStr)
 	}
@@ -96,5 +92,4 @@ func TestMain(t *testing.T) {
 	// ...
 
 	// Exit with the appropriate exit code
-
 }

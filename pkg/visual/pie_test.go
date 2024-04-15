@@ -1,14 +1,15 @@
-package visual
+package visual_test
 
 import (
 	"os"
 	"testing"
 
+	"github.com/johnmikee/cuebert/pkg/visual"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestPieChart(t *testing.T) {
-	o := &PieChartOption{
+	o := &visual.PieChartOption{
 		ValueList: []float64{30, 50, 20},
 		XAxis:     []string{"A", "B", "C"},
 		Text:      "Pie Chart",
@@ -16,7 +17,7 @@ func TestPieChart(t *testing.T) {
 		Query:     "query",
 	}
 
-	result, err := PieChart(o)
+	result, err := visual.PieChart(o)
 
 	assert.NoError(t, err)
 	assert.NotEmpty(t, result)

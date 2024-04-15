@@ -13,7 +13,6 @@ func TestNewJamf(t *testing.T) {
 	config := mdm.Config{
 		Domain: "example.com",
 		MDM:    mdm.Jamf,
-		// Other configuration fields
 	}
 
 	// Create a sample MDM instance
@@ -30,7 +29,7 @@ func TestNewJamf(t *testing.T) {
 	case *jamf.Client:
 		// The provider is of type *jamf.Client, which is expected for Jamf MDM
 		t.Log("Jamf provider created successfully")
-	case *kandji.Config:
+	case *kandji.Client:
 		t.Error("Expected Jamf provider, but got Kandji provider")
 	default:
 		t.Error("Unknown provider type")
@@ -58,7 +57,7 @@ func TestNewKandji(t *testing.T) {
 	switch provider.(type) {
 	case *jamf.Client:
 		t.Error("Expected Kandji provider, but got Jamf provider")
-	case *kandji.Config:
+	case *kandji.Client:
 		// The provider is of type *kandji.Config, which is expected for Kandji MDM
 		t.Log("Kandji provider created successfully")
 	default:

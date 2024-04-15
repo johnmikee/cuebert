@@ -29,11 +29,9 @@ build/
 *.zip
 
 *.log
-
+*.log.gz
 # For the readme tools
 __pycache__/
 
 # For testing docker
 .env
-
-.build/

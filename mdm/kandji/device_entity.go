@@ -22,7 +22,7 @@ type DeviceResult struct {
 	SerialNumber    string      `json:"serial_number"`
 	Platform        string      `json:"platform"`
 	OSVersion       string      `json:"os_version"`
-	LastCheckIn     *time.Time  `json:"last_check_in"`
+	LastCheckIn     string      `json:"last_check_in"`
 	User            *UserUnion  `json:"user"`
 	AssetTag        interface{} `json:"asset_tag"`
 	BlueprintID     string      `json:"blueprint_id"`
@@ -34,6 +34,35 @@ type DeviceResult struct {
 	FirstEnrollment string      `json:"first_enrollment"`
 	LastEnrollment  string      `json:"last_enrollment"`
 	BlueprintName   string      `json:"blueprint_name"`
+}
+
+type DeviceGet struct {
+	DeviceID                   string    `json:"device_id"`
+	DeviceName                 string    `json:"device_name"`
+	Model                      string    `json:"model"`
+	SerialNumber               string    `json:"serial_number"`
+	Platform                   string    `json:"platform"`
+	OsVersion                  string    `json:"os_version"`
+	SupplementalBuildVersion   string    `json:"supplemental_build_version"`
+	SupplementalOsVersionExtra string    `json:"supplemental_os_version_extra"`
+	LastCheckIn                time.Time `json:"last_check_in"`
+	User                       UserGet   `json:"user"`
+	AssetTag                   string    `json:"asset_tag"`
+	BlueprintID                string    `json:"blueprint_id"`
+	MdmEnabled                 bool      `json:"mdm_enabled"`
+	AgentInstalled             bool      `json:"agent_installed"`
+	IsMissing                  bool      `json:"is_missing"`
+	IsRemoved                  bool      `json:"is_removed"`
+	AgentVersion               string    `json:"agent_version"`
+	FirstEnrollment            string    `json:"first_enrollment"`
+	LastEnrollment             string    `json:"last_enrollment"`
+	BlueprintName              string    `json:"blueprint_name"`
+}
+type UserGet struct {
+	Email      string `json:"email"`
+	Name       string `json:"name"`
+	ID         int    `json:"id"`
+	IsArchived bool   `json:"is_archived"`
 }
 
 // ActivationLock stores information on activation lock data on the device
@@ -112,10 +141,13 @@ type LibraryItems struct {
 	RulesPresent      bool        `json:"rules_present"`
 }
 
+// Computer stores the id and name of a computer
 type Computer struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
 }
+
+// Blueprint stores the id and name of a blueprint
 type Blueprint struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
@@ -123,23 +155,9 @@ type Blueprint struct {
 
 // MDM holds information related to MDM data of the device
 type MDM struct {
-	MdmEnabled     string     `json:"mdm_enabled"`
-	Supervised     string     `json:"supervised"`
-	InstallDate    string     `json:"install_date"`
-	LastCheckIn    *time.Time `json:"last_check_in"`
-	MdmEnabledUser []string   `json:"mdm_enabled_user"`
-}
-
-// Users holds information about the console and system users on the machine
-type Users struct {
-	RegularUsers []User `json:"regular_users"`
-	SystemUsers  []User `json:"system_users"`
-}
-
-// User represents a user object for the machine user
-type User struct {
-	Username string  `json:"username"`
-	Uid      string  `json:"uid"`
-	Path     string  `json:"path"`
-	Name     *string `json:"name,omitempty"`
+	MdmEnabled     string   `json:"mdm_enabled"`
+	Supervised     string   `json:"supervised"`
+	InstallDate    string   `json:"install_date"`
+	LastCheckIn    string   `json:"last_check_in"`
+	MdmEnabledUser []string `json:"mdm_enabled_user"`
 }

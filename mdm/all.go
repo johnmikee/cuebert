@@ -17,13 +17,16 @@ type Device struct {
 	LastEnrollment  string      `json:"last_enrollment"`
 }
 
+// DeviceResults is a slice of Device used for convenience functions
 type DeviceResults []Device
 
+// DeviceDetails is the struct that contains the device information for Devices and Users
 type DeviceDetails struct {
 	General Device `json:"general"`
 	Users   User   `json:"users"`
 }
 
+// User is the struct that contains the user information pulled from the implementation
 type User struct {
 	Email string `json:"email"`
 	Name  string `json:"name"`

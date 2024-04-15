@@ -1,9 +1,11 @@
-package helpers
+package helpers_test
 
 import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/johnmikee/cuebert/pkg/helpers"
 )
 
 func TestDate(t *testing.T) {
@@ -11,7 +13,7 @@ func TestDate(t *testing.T) {
 	month := 5
 	day := 29
 	expected := time.Date(year, time.Month(month), day, 0, 0, 0, 0, time.UTC)
-	result := Date(year, month, day)
+	result := helpers.Date(year, month, day)
 
 	if result != expected {
 		t.Errorf("Date failed: expected '%s', got '%s'", expected, result)
@@ -23,7 +25,7 @@ func TestStringToTime(t *testing.T) {
 	timeString := "2023-06-19T10:30:00Z"
 	expectedResult := time.Date(2023, time.June, 19, 10, 30, 0, 0, time.UTC)
 
-	result, err := StringToTime(timeString)
+	result, err := helpers.StringToTime(timeString)
 	if err != nil {
 		t.Errorf("Test case failed: unexpected error: %v", err)
 	}
@@ -34,14 +36,14 @@ func TestStringToTime(t *testing.T) {
 	// Test case: Invalid time string
 	invalidTimeString := "2023-06-19T10:30:00"
 	expectedErrorMessage := "cannot parse"
-	if _, err := StringToTime(invalidTimeString); err == nil || !strings.Contains(err.Error(), expectedErrorMessage) {
+	if _, err := helpers.StringToTime(invalidTimeString); err == nil || !strings.Contains(err.Error(), expectedErrorMessage) {
 		t.Errorf("Test case failed: expected error containing \"%s\", got %v", expectedErrorMessage, err)
 	}
 }
 
 func TestUpdateTime(t *testing.T) {
 	expected := time.Now().UTC()
-	result := UpdateTime()
+	result := helpers.UpdateTime()
 
 	// Allow a small time difference for comparison due to precision limitations
 	timeDiff := result.Sub(expected)

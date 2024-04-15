@@ -74,12 +74,24 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"io"
-	"net/http"
 	"strconv"
 
 	"github.com/johnmikee/cuebert/mdm"
 )
+
+// Users holds information about the console and system users on the machine
+type Users struct {
+	RegularUsers []User `json:"regular_users"`
+	SystemUsers  []User `json:"system_users"`
+}
+
+// User represents a user object for the machine user
+type User struct {
+	Username string  `json:"username"`
+	Uid      string  `json:"uid"`
+	Path     string  `json:"path"`
+	Name     *string `json:"name,omitempty"`
+}
 
 // UserUnion joins the potential types that can be returned for a user.
 type UserUnion struct {
@@ -119,8 +131,8 @@ func unmarshalUnion(data []byte,
 	pm interface{},
 	haveEnum bool,
 	pe interface{},
-	nullable bool) (bool, error) {
-
+	nullable bool,
+) (bool, error) {
 	if pi != nil {
 		*pi = nil
 	}
@@ -201,7 +213,6 @@ func unmarshalUnion(data []byte,
 		return false, errors.New("cannot handle delimiter")
 	}
 	return false, errors.New("cannot unmarshal union")
-
 }
 
 func marshalUnion(
@@ -217,7 +228,8 @@ func marshalUnion(
 	pm interface{},
 	haveEnum bool,
 	pe interface{},
-	nullable bool) ([]byte, error) {
+	nullable bool,
+) ([]byte, error) {
 	if pi != nil {
 		return json.Marshal(*pi)
 	}
@@ -267,7 +279,6 @@ func (x *UserUnion) UnmarshalJSON(data []byte) error {
 		false,
 		nil,
 		false)
-
 	if err != nil {
 		return err
 	}
@@ -281,38 +292,12 @@ func (x *UserUnion) MarshalJSON() ([]byte, error) {
 	return marshalUnion(nil, nil, nil, x.String, false, nil, x.UserClass != nil, x.UserClass, false, nil, false, nil, false)
 }
 
-func handleDeviceUserResponse(resp *http.Response) (DeviceResults, error) {
-	b, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	deviceResults, err := unmarshalDeviceResults(b)
-	if err != nil {
-		return nil, err
-	}
-
-	return deviceResults, nil
-}
-
-func handleDeviceDetailResponse(resp *http.Response) (*DeviceDetails, error) {
-	b, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	deviceDetails, err := unmarshalDeviceDetails(b)
-	if err != nil {
-		return nil, err
-	}
-
-	return &deviceDetails, nil
-}
-
 // GetUsers implements mdm.Provider.
-func (c *Config) GetUsers(opts *mdm.QueryOpts) ([]mdm.User, error) {
-	var res mdm.DeviceResults
-	var err error
+func (c *Client) GetUsers(opts *mdm.QueryOpts) ([]mdm.User, error) {
+	var (
+		res mdm.DeviceResults
+		err error
+	)
 
 	if opts != nil {
 		res, err = c.withQuery(opts)
@@ -332,10 +317,10 @@ func (c *Config) GetUsers(opts *mdm.QueryOpts) ([]mdm.User, error) {
 	return mu, nil
 }
 
-func (c *Config) all() (mdm.DeviceResults, error) {
+func (c *Client) all() (mdm.DeviceResults, error) {
 	return c.ListAllDevices()
 }
 
-func (c *Config) withQuery(opts *mdm.QueryOpts) (mdm.DeviceResults, error) {
+func (c *Client) withQuery(opts *mdm.QueryOpts) (mdm.DeviceResults, error) {
 	return c.QueryDevices(opts)
 }

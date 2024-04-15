@@ -1,23 +1,24 @@
-package logger
+package logger_test
 
 import (
 	"testing"
 
+	"github.com/johnmikee/cuebert/pkg/logger"
 	"github.com/rs/zerolog"
 	"github.com/rzajac/zltest"
 )
 
 func TestNewLogger(t *testing.T) {
 	tst := zltest.New(t)
-	config := &Config{
+	config := &logger.Config{
 		ToFile:  true,
-		Level:   DEBUG,
+		Level:   logger.DEBUG,
 		Service: "test-service",
 		Env:     "prod",
-		writer:  tst,
+		Writer:  tst,
 	}
 	// Configure zerolog and pass tester as a writer.
-	log := NewLogger(config)
+	log := logger.New(config)
 	// Inject log to tested service or package.
 	srv := (log)
 
@@ -33,67 +34,66 @@ func TestNewLogger(t *testing.T) {
 	ent.ExpMsg("new logger test")
 	ent.ExpLevel(zerolog.DebugLevel)
 	ent.ExpKey("service")
-
 }
 
 func TestDefaultLevelSet(t *testing.T) {
-	logger := Default()
+	logger := logger.Default()
 
 	if logger.GetLevel() != zerolog.DebugLevel {
 		t.Error("Default failed: expected DebugLevel")
 	}
-
 }
 
 func TestLeveler(t *testing.T) {
-	level := leveler(INFO)
+	level := logger.SetLevel(logger.INFO)
 	if level != zerolog.InfoLevel {
 		t.Errorf("leveler failed: expected InfoLevel, got %s", level.String())
 	}
 
-	level = leveler(TRACE)
+	level = logger.SetLevel(logger.TRACE)
 	if level != zerolog.TraceLevel {
 		t.Errorf("leveler failed: expected TraceLevel, got %s", level.String())
 	}
 
-	level = leveler(WARN)
+	level = logger.SetLevel(logger.WARN)
 	if level != zerolog.WarnLevel {
 		t.Errorf("leveler failed: expected WarnLevel, got %s", level.String())
 	}
 
-	level = leveler("unknown")
+	level = logger.SetLevel("unknown")
 	if level != zerolog.DebugLevel {
 		t.Errorf("leveler failed: expected DebugLevel, got %s", level.String())
 	}
 }
 
 func TestInitLogger(t *testing.T) {
-	config := &Config{
+	config := &logger.Config{
 		ToFile:  true,
-		Level:   DEBUG,
+		Level:   logger.DEBUG,
 		Service: "test-service",
 		Env:     "prod",
 	}
 
-	logger := initLogger(config)
+	logger.Setup(config)
+	log := logger.GetLogger()
 
-	if logger.GetLevel().String() != config.Level {
-		t.Errorf("initLogger failed: expected level %s, got %s", config.Level, logger.GetLevel().String())
+	if log.GetLevel().String() != config.Level {
+		t.Errorf("initLogger failed: expected level %s, got %s", config.Level, log.GetLevel().String())
 	}
 }
 
 func TestChildLogger(t *testing.T) {
 	tst := zltest.New(t)
 
-	config := &Config{
+	config := &logger.Config{
 		ToFile:  true,
-		Level:   DEBUG,
+		Level:   logger.DEBUG,
 		Service: "test-child-logger-service",
 		Env:     "prod",
-		writer:  tst,
+		Writer:  tst,
 	}
 	// Configure zerolog and pass tester as a writer.
-	log := NewLogger(config)
+	log := logger.New(config)
 	// Inject log to tested service or package.
 	srv := (log)
 

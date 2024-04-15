@@ -46,6 +46,9 @@ test:
 
 build: cuebert
 
+dev: .pre-build .pre-cuebert
+	go build -o build/$(CURRENT_PLATFORM)/cuebert -ldflags ${BUILD_VERSION} ./cuebert
+
 clean:
 	rm -rf build/
 	rm -f *.zip
@@ -53,6 +56,8 @@ clean:
 .pre-build:
 	mkdir -p build/darwin
 	mkdir -p build/linux
+
+install-local: install-cuebert
 
 APP_NAME = cuebert
 
@@ -62,8 +67,15 @@ APP_NAME = cuebert
 cuebert: .pre-build .pre-cuebert
 	go build -o build/$(CURRENT_PLATFORM)/cuebert -ldflags ${BUILD_VERSION} ./cuebert
 
-install: .pre-cuebert
-	go install -ldflags ${BUILD_VERSION} ./cuebert
+install-cuebert: .pre-cuebert
+	go install -ldflags ${BUILD_VERSION} ./cmd/cuebert
+
+xp-cuebert: .pre-build .pre-cuebert
+	GOOS=darwin go build -o build/darwin/cuebert -ldflags ${BUILD_VERSION} ./cuebert
+	GOOS=linux CGO_ENABLED=0 go build -o build/linux/cuebert -ldflags ${BUILD_VERSION} ./cuebert
+
+release-zip: xp-cuebert
+	zip -r cue_${VERSION}.zip build/
 
 docker-cuebert:
 	cp resources/Docker/cuebert/Dockerfile .
@@ -95,3 +107,9 @@ vet:
 
 tidy:
 	go mod tidy
+
+fmt:
+	gofumpt -l -w .
+
+lint:
+	golangci-lint run -v -c .golangci.yml ./...

@@ -1,8 +1,10 @@
-package helpers
+package helpers_test
 
 import (
 	"testing"
 	"time"
+
+	"github.com/johnmikee/cuebert/pkg/helpers"
 )
 
 func TestInRange(t *testing.T) {
@@ -41,7 +43,7 @@ func TestInRange(t *testing.T) {
 		}
 
 		// Invoke the function and get the actual result
-		actual := InRange(tc.start, tc.end, currentTime)
+		actual := helpers.InRange(tc.start, tc.end, currentTime)
 
 		// Compare the actual result with the expected result
 		if actual != tc.expected {

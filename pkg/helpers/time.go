@@ -1,6 +1,9 @@
 package helpers
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 // Date will return a time.Time object in UTC
 func Date(year, month, day int) time.Time {
@@ -20,4 +23,26 @@ func StringToTime(timeString string) (time.Time, error) {
 // UpdateTime will return the current time in UTC
 func UpdateTime() time.Time {
 	return time.Now().UTC()
+}
+
+func DateDiffFromToday(dateString string) (int, error) {
+	dateFormat := "2006-01-02"
+
+	// Parse the input date string into a time.Time object.
+	inputDate, err := time.Parse(dateFormat, dateString)
+	if err != nil {
+		fmt.Println("Error parsing date:", err)
+		return 0, err
+	}
+
+	// Get the current date and time.
+	currentDate := time.Now()
+
+	// Calculate the duration between the two dates.
+	duration := currentDate.Sub(inputDate)
+
+	// Extract the number of days from the duration.
+	daysDifference := int(duration.Hours() / 24)
+
+	return daysDifference, nil
 }

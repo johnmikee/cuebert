@@ -1,32 +1,18 @@
 package kandji
 
 import (
-	"encoding/json"
 	"fmt"
-	"net/http"
-	"regexp"
-	"strings"
+	"time"
 
 	"github.com/johnmikee/cuebert/mdm"
+	"github.com/johnmikee/cuebert/pkg/requester"
 )
 
 // DeviceResults is a list of DeviceResult
 type DeviceResults []DeviceResult
 
-func unmarshalDeviceResults(data []byte) (DeviceResults, error) {
-	var r DeviceResults
-	err := json.Unmarshal(data, &r)
-	return r, err
-}
-
-func unmarshalDeviceDetails(data []byte) (DeviceDetails, error) {
-	var r DeviceDetails
-	err := json.Unmarshal(data, &r)
-	return r, err
-}
-
 // GetDeviceDetails returns details on the device
-func (c *Config) GetDeviceDetails(d string) (*mdm.Device, error) {
+func (c *Client) GetDeviceDetails(d string) (*mdm.Device, error) {
 	details, err := c.deviceDetails(d)
 	if err != nil {
 		return nil, err
@@ -39,7 +25,7 @@ func (c *Config) GetDeviceDetails(d string) (*mdm.Device, error) {
 		SerialNumber:    details.HardwareOverview.SerialNumber,
 		Platform:        details.General.Platform,
 		OSVersion:       details.General.OSVersion,
-		LastCheckIn:     details.Mdm.LastCheckIn,
+		LastCheckIn:     kandjiTimeFixer(details.Mdm.LastCheckIn),
 		AssetTag:        details.General.AssetTag,
 		FirstEnrollment: details.General.FirstEnrollment,
 		LastEnrollment:  details.General.LastEnrollment,
@@ -51,54 +37,78 @@ func (c *Config) GetDeviceDetails(d string) (*mdm.Device, error) {
 	}, nil
 }
 
-func (c *Config) deviceDetails(d string) (*DeviceDetails, error) {
+func kandjiTimeFixer(t string) *time.Time {
+	layout := "2006-01-02 15:04:05.000000-07:00"
+
+	ts, err := time.Parse(layout, t)
+	if err != nil {
+		return nil
+	}
+
+	return &ts
+}
+
+func (c *Client) deviceDetails(d string) (*DeviceDetails, error) {
 	u := fmt.Sprintf("devices/%s/details", d)
 
-	req, err := c.newRequest(http.MethodGet, u, nil)
+	req, err := c.newRequest(u)
 	if err != nil {
-		c.log.Err(err).Msg("error building request")
+		c.log.Debug().AnErr("error", err).Msg("building request")
 		return nil, err
 	}
 
-	resp, err := c.do(req)
+	var deviceDetails DeviceDetails
+	_, err = c.do(req, &deviceDetails)
 	if err != nil {
-		c.log.Err(err).Msg("error making request")
+		c.log.Debug().AnErr("error", err).Msg("making request")
 		return nil, err
 	}
 
-	details, err := handleDeviceDetailResponse(resp)
-	if err != nil {
-		return nil, err
-	}
-
-	return details, err
+	return &deviceDetails, nil
 }
 
-func (c *Config) list(limit, offset int) (DeviceResults, error) {
+func (c *Client) getDevice(d string) (*DeviceGet, error) {
+	u := fmt.Sprintf("devices/%s", d)
+
+	req, err := c.newRequest(u)
+	if err != nil {
+		c.log.Debug().AnErr("error", err).Msg("building request")
+		return nil, err
+	}
+
+	var deviceDetails DeviceGet
+	_, err = c.do(req, &deviceDetails)
+	if err != nil {
+		c.log.Debug().AnErr("error", err).Msg("making request")
+		return nil, err
+	}
+
+	return &deviceDetails, nil
+}
+
+func (c *Client) list(limit, offset int) (DeviceResults, error) {
 	url := fmt.Sprintf("devices?limit=%d&offset=%d", limit, offset)
 
-	req, err := c.newRequest(http.MethodGet, url, nil)
+	req, err := c.newRequest(url)
 	if err != nil {
-		c.log.Err(err).Msg("error building request")
+		c.log.Debug().AnErr("error", err).Msg("building request")
 		return nil, err
 	}
 
-	resp, err := c.do(req)
+	var res DeviceResults
+	_, err = c.do(req, &res)
 	if err != nil {
-		c.log.Info().Str("url", req.URL.String()).Msg("error making request")
-		c.log.Err(err).Msg("error making request")
+		c.log.Debug().
+			AnErr("err", err).
+			Str("url", req.URL.String()).
+			Msg("error making request")
 		return nil, err
 	}
 
-	deviceResults, err := handleDeviceUserResponse(resp)
-	if err != nil {
-		return nil, err
-	}
-
-	return deviceResults, nil
+	return res, nil
 }
 
-func (c *Config) listDevices(limit, offset int) (mdm.DeviceResults, error) {
+func (c *Client) listDevices(limit, offset int) (mdm.DeviceResults, error) {
 	dev, err := c.list(limit, offset)
 	if err != nil {
 		return nil, err
@@ -110,7 +120,7 @@ func (c *Config) listDevices(limit, offset int) (mdm.DeviceResults, error) {
 }
 
 // ListAllDevices will paginate through devices until there is no response and return the results
-func (c *Config) ListAllDevices() (mdm.DeviceResults, error) {
+func (c *Client) ListAllDevices() (mdm.DeviceResults, error) {
 	opts := &offsetRange{
 		Limit:  300,
 		Offset: 0,
@@ -121,7 +131,7 @@ func (c *Config) ListAllDevices() (mdm.DeviceResults, error) {
 	for {
 		results, err := c.listDevices(opts.Limit, opts.Offset)
 		if err != nil {
-			c.log.Err(err).Msg("error listing devices")
+			c.log.Info().AnErr("error", err).Msg("listing devices")
 			return results, err
 		}
 		count += len(results)
@@ -130,46 +140,33 @@ func (c *Config) ListAllDevices() (mdm.DeviceResults, error) {
 			break
 		}
 		res = append(res, results...)
-
 	}
 
 	return res, nil
 }
 
 // QueryDevices will return  devices based off query passed.
-func (c *Config) QueryDevices(opts *mdm.QueryOpts) (mdm.DeviceResults, error) {
-	query := fmt.Sprintf(
-		"devices?asset_tag=%s&device_id=%s&device_name=%s&model=%s&os_version=%s&serial_number=%s&platform=%s&user_email=%s&user_id=%s&user_name=%s&",
-		opts.AssetTag,
-		opts.DeviceID,
-		opts.DeviceName,
-		opts.Model,
-		opts.OSVersion,
-		opts.SerialNumber,
-		opts.Platform,
-		opts.UserEmail,
-		opts.UserID,
-		opts.UserName,
+func (c *Client) QueryDevices(opts *mdm.QueryOpts) (mdm.DeviceResults, error) {
+	query, err := requester.BuildQuery(
+		&requester.Query{
+			Endpoint: "devices",
+			Params:   requester.StructToQuery(opts),
+		},
 	)
-
-	m := regexp.MustCompile(`[a-z\_]+\=&`)
-	query = m.ReplaceAllString(query, "")
-	query = strings.TrimSuffix(query, "&")
-
-	req, err := c.newRequest(http.MethodGet, query, nil)
 	if err != nil {
-		c.log.Err(err).Msg("error building request")
+		c.log.Debug().AnErr("error", err).Msg("building query")
+		return nil, err
+	}
+	req, err := c.newRequest(query)
+	if err != nil {
+		c.log.Debug().AnErr("error", err).Msg("building request")
 		return nil, err
 	}
 
-	resp, err := c.do(req)
+	var deviceResults DeviceResults
+	_, err = c.do(req, &deviceResults)
 	if err != nil {
-		c.log.Err(err).Msg("error making request")
-		return nil, err
-	}
-
-	deviceResults, err := handleDeviceUserResponse(resp)
-	if err != nil {
+		c.log.Debug().AnErr("error", err).Msg("making request")
 		return nil, err
 	}
 

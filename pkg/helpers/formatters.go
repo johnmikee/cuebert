@@ -4,8 +4,6 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-
-	"github.com/slack-go/slack"
 )
 
 // extractEmails extracts email addresses from the given message
@@ -48,13 +46,10 @@ func ValToInt(s string) int {
 	return i
 }
 
-// optsToStrs converts a slice of slack.OptionBlockObject values to a string.
-// It extracts the Value field from each option and returns them as a comma-separated string.
-func OptsToStrs(opts []slack.OptionBlockObject) string {
+// OptsToStrs converts a slice of options to a string.
+func OptsToStrs(opts []string) string {
 	var strs []string
-	for _, o := range opts {
-		strs = append(strs, o.Value)
-	}
+	strs = append(strs, opts...)
 
 	if len(strs) > 1 {
 		return strings.Join(strs, ",")

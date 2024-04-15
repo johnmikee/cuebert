@@ -26,15 +26,12 @@ cuebert
 
 ______________________________________________________________________
 
-## Overview
+##  Overview
+Cuebert is a slackbot to help encourage users to complete a task. Initially written to help encourage users to upgrade the OS on their machine(s) Cuebert has grown to be a general purpose reminderbot. Written in Go this program is intended to be lightweight, fast, and scalable. <br />
 
-### Cuebert
-Cuebert is a slackbot to help encourage users to upgrade the OS on their machine(s). Written in Go this program is intended to be lightweight, fast, and scalable.
-Cuebert is simple bot - pass the required OS version and deadline as arguments, and any other relevant flags, and the process will begin. <br />
+While the scope has grown, Cuebert is still a simple bot - pass the required OS version, task name/ID, and deadline as arguments, and any other relevant flags, and the process will begin. <br />
 
-The goal of Cuebert is empowering the end user. Offering custom reminders and the ability to leverage exclusions, this program seeks to let the user decide when the right time to upgrade is while giving them subtle reminders to do so. By having the fleet on the latest, or latest major, release we reduce a significant attack vector. Apple has made it clear the only fully updated OS is the latest OS. So while old versions might get some security patches they are not getting the full attention of the latest version. <br />
-
-When Apple pushes out a new release IT will test the updates. Once the update has met the acceptance criteria the minimum required version and date will be updated and Cuebert will begin its reminder cycle.
+The goal of Cuebert is empowering the end user. Offering custom reminders and the ability to leverage exclusions, this program seeks to let the user decide when the right time to finish the task while giving them subtle reminders to do so.
 <br />
 
 This program was written using Slack's [socket mode](https://api.slack.com/apis/connections/socket) making testing quick and easy. There is no need for callback urls or public listener's, Cuebert will be "live" wherever you run it from. <br />
@@ -67,45 +64,56 @@ While the other two methods are preferred, you may also store the values in a lo
 
 ______________________________________________________________________
 ## Flow
-By default when the program starts the four tables are deleted. Pulling the data and populating the tables takes roughly 2-3 seconds and ensures we start with a fresh data set. Should you wish to keep the data pass `-clear-tables=false`. <br />
+By default when the program starts it does not begin the process of messaging users. This allows Cuebert to be started and configured before any routines begin. At this point Cuebert will respond to messages and commands but will not actively message users. This is defined by the `init` flag. <br />
+
+To advance Cuebert from the initialization stage you can run
+* `start cuebert`
+
+This will pull up a modal allowing you to adjust configuration options.<br />
+![alt text](.docs/gifs/start-menu.gif)
+
+* This menu can be pulled up at anytime using `update cuebert`.<br />
+<br />
+
+By default when the program starts the tables are deleted. Pulling the data and populating the tables takes roughly 2-3 seconds and ensures we start with a fresh data set. Should you wish to keep the data pass `-clear-tables=false`. <br />
 
 After reading in the configuration needed to start the first action takin is to start a goroutine to respond to user input. This handles any messages sent to Cuebert, reminder modal input, acknowledgement of messages sent, or any information Cuebert would need to respond to. <br />
 
+### Compliance
+Once the configuration has been read in and the tables have been populated the `compliance_tracking` table is configured. This pulls data from the `compliance_task` and `compliance_users` table to gather the information on the user, and their manager, needed to begin.<br />
+
+### OS Update
 Once the configuration has been read in and the tables have been populated the `bot_results` table is configured. This pulls data from the `devices` and `users` table to gather the information on the user, and their manager, needed to begin.<br />
 <br />
 
 At this point Cuebert begins maintenance tasks. Three routines are started and will repeat on a set time interval.<br />
 
-* Device Diff
-    - Every 60 minutes the [deviceDiff](cuebert/devices.go) function runs to pull info from the DB, compare that to the MDM information, and update where necessary. This ensures we are not messaging users who have updated in between reminders and always operating of fresh device data. If a device is above the required version it will be dropped from the table during this.
+* Diff
+    - Every 60 minutes the `Diff` function runs to pull info from the DB, compare that to the MDM, or Compliance source, information, and update where necessary. This ensures we are not messaging users who have updated in between reminders and always operating off fresh data.
 <br />
 
 * Check
-    - Every 30 minutes [check](cuebert/check.go) runs to see if messaging needs to be sent to the user. The information is pulled from the `bot_results` table which stores if a user has been sent the message and when/if they responded. If the conditions are met where the user should be notified that will occur.
+    - Every 30 minutes `Check` runs to see if messaging needs to be sent to the user. The information is pulled from either the `bot_results` or `compliance_tracking` table which stores if a user has been sent the message and when/if they responded. If the conditions are met where the user should be notified that will occur.
 <br />
 
-* Poll Reminders
-    - Every 15 minutes [pollReminders](cuebert/check.go) runs to see if anyone needs a custom OS upgrade reminder set. Since a user can set a reminder for any point, at any time, we need to regularly check this data. Should a reminder be set in within the next 15 minutes of check running a routine is started to remind the user at that time.
+* Poll
+    - Every 15 minutes `Poll` runs to see if anyone needs a custom OS upgrade reminder set. Since a user can set a reminder for any point, at any time, we need to regularly check this data. Should a reminder be set in within the next 15 minutes of check running a routine is started to remind the user at that time.
 <br />
+___________________________________________________________
 
-______________________________________________________________________
+## Messaging
+There are three main messages Cuebert will send.<br />
 
-## Methods
-There are two methods for Cuebert to run in - timebound and manager. 
+
+* First Message
+    - This message is sent on Monday to the user informing them of the task and deadline. This message is sent to the user in a DM with Cuebert.
+
+* Final Message
+      - This message is sent on Friday to the user informing them of the task and deadline. This message is sent to the user in a DM with Cuebert.
 <br />
-
-### Timebound
-Timebound is a more traditional [nudge](https://github.com/macadmins/nudge) like approach. Users are reminded on a set schedule until the update is complete. The reminders can be deferred until a specific date, delayed, or changed in frequency.<br />
-* Note - this method is still being fully built out and tested.
-<br />
-
-### Manager
-This approach leverages a companies people management to facilitate updating machines that are on older versions. A new version is pushed out and if the user does not update Cuebert drops the user and their manager in a room to chat about whats going on. This method does not remind constantly or daily and relies on the relationship between manager and IC to be the push.
-<br />
-______________________________________________________________________
 
 ## Reminders
-At anytime a user can request a reminder to upgrade. A prompt appears to ask if the user would like to set a reminder.<br />
+At anytime a user can request a reminder to finish the task at hand. A prompt appears to ask if the user would like to set a reminder.<br />
 ![alt text](.docs/images/want_reminder.png)
 <br />
 
@@ -290,7 +298,7 @@ Usage of ./build/darwin/cuebert:
   -service-name string
         if using the dev env the service name to store keys under. (default "cuebert")
   -table-names string
-        a list of tables to clear on initialization. (comma separated) (default "bot_results,devices,exclusions,users")
+        a list of tables to clear on initialization. (comma separated)
   -testing
         Log actions that would take place instead of performing them. (default true)
   -testing-end-time string
@@ -301,16 +309,6 @@ Usage of ./build/darwin/cuebert:
         a list of slack id's to perform the actions on during testing instead of every user. (comma separated)
 ```
 <hr />
-
-## Future Development
-
-- \[📌\] \[Initial release\]
-- \[ \] \[📌  Finish Tests\]
-- \[ \] \[📌  Multiple OS Support\]
-- \[ \] \[📌  Multiple iDP Support\]
-- \[ \] \[📌  Multiple MDM Support\]
-- \[ \] \[📌  Zero-day flow for Cuebert\]
-- \[ \] \[📌  Creation of Cubes (actions to run if deadline passed)\]
 ______________________________________________________________________
 
 ## Contributing
@@ -328,7 +326,3 @@ git commit -m 'fixed cuebert going sentient'
 git push -u origin cuebert-selfaware-removal
 ```
 4. Create a pull request to the original repository and describe the changes you've made and why they're necessary.
-
-
-## Acknowledgments
-This project was heavily inspired by the work of both [micromdm](https://github.com/micromdm/micromdm) and [nanomdm](https://github.com/micromdm/nanomdm) and anything smart logic wise probably came from there.

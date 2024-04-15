@@ -56,7 +56,6 @@ func PieChart(o *PieChartOption) (string, error) {
 		charts.WidthOptionFunc(1600),
 		pieSeriesShowCount(),
 	)
-
 	if err != nil {
 		return "", err
 	}

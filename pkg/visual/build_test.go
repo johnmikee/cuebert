@@ -1,10 +1,11 @@
-package visual
+package visual_test
 
 import (
 	"os"
 	"path/filepath"
 	"testing"
 
+	"github.com/johnmikee/cuebert/pkg/visual"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -18,10 +19,10 @@ func TestBuildOut(t *testing.T) {
 	}()
 
 	input := "test-input"
-	visType := Pie
+	visType := visual.Pie
 	buf := []byte{1, 2, 3, 4}
 
-	result, err := buildOut(input, nil, visType, buf)
+	result, err := visual.Build(input, nil, visType, buf)
 
 	assert.NoError(t, err)
 	assert.NotEmpty(t, result)
@@ -43,11 +44,11 @@ func TestBuildOutErr(t *testing.T) {
 	}()
 
 	input := "test-input"
-	visType := Pie
+	visType := visual.Pie
 	buf := []byte{1, 2, 3, 4}
 
 	// This should cause an error
-	result, err := buildOut(input, &tmpBadPath, visType, buf)
+	result, err := visual.Build(input, &tmpBadPath, visType, buf)
 
 	assert.Error(t, err)
 	assert.NotEmpty(t, result)
@@ -68,7 +69,7 @@ func Test_buildOut(t *testing.T) {
 	type args struct {
 		input   string
 		output  *string
-		visType VisualType
+		visType visual.VisualType
 		buf     []byte
 	}
 	tests := []struct {
@@ -81,7 +82,7 @@ func Test_buildOut(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := buildOut(tt.args.input, tt.args.output, tt.args.visType, tt.args.buf)
+			got, err := visual.Build(tt.args.input, tt.args.output, tt.args.visType, tt.args.buf)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("buildOut() error = %v, wantErr %v", err, tt.wantErr)
 				return

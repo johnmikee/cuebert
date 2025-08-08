@@ -12,7 +12,7 @@ import (
 // UpdateTask represents an OS or software update task
 type UpdateTask struct {
 	BaseTask
-	
+
 	// Update-specific fields
 	DeviceID       string    `json:"device_id" db:"device_id"`
 	DeviceSerial   string    `json:"device_serial" db:"device_serial"`
@@ -21,7 +21,7 @@ type UpdateTask struct {
 	TargetVersion  string    `json:"target_version" db:"target_version"`
 	UpdateType     string    `json:"update_type" db:"update_type"` // os, security, app
 	Deadline       time.Time `json:"deadline" db:"deadline"`
-	
+
 	// Update checker function
 	checkUpdate func(ctx context.Context, deviceID string) (bool, string, error)
 }
@@ -35,7 +35,7 @@ func NewUpdateTask(
 ) *UpdateTask {
 	taskName := fmt.Sprintf("%s Update", deviceOS)
 	description := fmt.Sprintf("Update %s from %s to %s", deviceOS, currentVersion, targetVersion)
-	
+
 	return &UpdateTask{
 		BaseTask: BaseTask{
 			ID:           id,
@@ -67,12 +67,12 @@ func (u *UpdateTask) Execute(ctx context.Context) error {
 		Str("device_id", u.DeviceID).
 		Str("target_version", u.TargetVersion).
 		Msg("executing update task")
-	
+
 	// Update status to in progress
 	if err := u.SetStatus(TaskStatusInProgress); err != nil {
 		return errors.InternalError("update task status", err)
 	}
-	
+
 	// Check if device has been updated
 	if u.checkUpdate != nil {
 		updated, currentVersion, err := u.checkUpdate(ctx, u.DeviceID)
@@ -84,10 +84,10 @@ func (u *UpdateTask) Execute(ctx context.Context) error {
 				Msg("update check failed")
 			return errors.InternalError("check device update", err)
 		}
-		
+
 		// Update current version
 		u.CurrentVersion = currentVersion
-		
+
 		if updated {
 			if err := u.SetStatus(TaskStatusCompleted); err != nil {
 				return errors.InternalError("update task status", err)
@@ -110,7 +110,7 @@ func (u *UpdateTask) Execute(ctx context.Context) error {
 				Msg("device still needs update")
 		}
 	}
-	
+
 	return nil
 }
 
@@ -120,24 +120,24 @@ func (u *UpdateTask) Validate(ctx context.Context) error {
 	if err := u.BaseTask.Validate(ctx); err != nil {
 		return err
 	}
-	
+
 	// Update-specific validation
 	if u.DeviceID == "" {
 		return errors.ValidationError("device ID is required")
 	}
-	
+
 	if u.DeviceSerial == "" {
 		return errors.ValidationError("device serial is required")
 	}
-	
+
 	if u.TargetVersion == "" {
 		return errors.ValidationError("target version is required")
 	}
-	
+
 	if u.Deadline.IsZero() {
 		return errors.ValidationError("deadline is required")
 	}
-	
+
 	return nil
 }
 
@@ -161,14 +161,14 @@ func (u *UpdateTask) GetDaysUntilDeadline() int {
 	if u.IsComplete() {
 		return 0
 	}
-	
+
 	duration := u.Deadline.Sub(time.Now())
 	days := int(duration.Hours() / 24)
-	
+
 	if days < 0 {
 		return 0
 	}
-	
+
 	return days
 }
 
@@ -190,6 +190,6 @@ func (u *UpdateTask) GetUpdateMetadata() map[string]interface{} {
 	metadata["is_overdue"] = u.IsOverdue()
 	metadata["days_until_deadline"] = u.GetDaysUntilDeadline()
 	metadata["needs_update"] = u.NeedsUpdate()
-	
+
 	return metadata
 }

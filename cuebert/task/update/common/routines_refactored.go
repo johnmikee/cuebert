@@ -15,10 +15,10 @@ import (
 // This is the refactored version using the repository pattern.
 func (c *Common) CheckRefactored(t time.Time, p *shared.ReminderPayload) {
 	ctx := context.Background()
-	
+
 	// Create tracking repository instance
 	trackingRepo := repository.NewTrackingRepository(c.tables.Pool(), c.log, repository.TrackingTypeUpdate)
-	
+
 	// Get all tracking records
 	trackingRecords, err := trackingRepo.FindAll(ctx, nil)
 	if err != nil {
@@ -46,7 +46,7 @@ func (c *Common) CheckRefactored(t time.Time, p *shared.ReminderPayload) {
 						Msg("skipping: routine for first message already started")
 					continue
 				}
-				
+
 				// Send first message
 				c.shared.SendMSG(
 					&shared.ReminderPayload{
@@ -83,7 +83,7 @@ func (c *Common) CheckRefactored(t time.Time, p *shared.ReminderPayload) {
 						break
 					}
 				}
-				
+
 				if !finalMessageAlreadySent {
 					time.Sleep(1 * time.Second)
 					c.shared.SendMSG(&shared.ReminderPayload{

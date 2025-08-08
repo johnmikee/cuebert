@@ -12,13 +12,13 @@ import (
 // ComplianceTask represents a compliance training or certification task
 type ComplianceTask struct {
 	BaseTask
-	
+
 	// Compliance-specific fields
 	TrainingProvider string    `json:"training_provider" db:"training_provider"`
 	TrainingURL      string    `json:"training_url" db:"training_url"`
 	DueDate          time.Time `json:"due_date" db:"due_date"`
 	CertificateID    string    `json:"certificate_id,omitempty" db:"certificate_id"`
-	
+
 	// Compliance checker function
 	checkCompliance func(ctx context.Context, userID string) (bool, error)
 }
@@ -56,12 +56,12 @@ func (c *ComplianceTask) Execute(ctx context.Context) error {
 		Str("user_id", c.UserID).
 		Str("provider", c.TrainingProvider).
 		Msg("executing compliance task")
-	
+
 	// Update status to in progress
 	if err := c.SetStatus(TaskStatusInProgress); err != nil {
 		return errors.InternalError("update task status", err)
 	}
-	
+
 	// Check if user is compliant
 	if c.checkCompliance != nil {
 		compliant, err := c.checkCompliance(ctx, c.UserID)
@@ -73,7 +73,7 @@ func (c *ComplianceTask) Execute(ctx context.Context) error {
 				Msg("compliance check failed")
 			return errors.InternalError("check compliance", err)
 		}
-		
+
 		if compliant {
 			if err := c.SetStatus(TaskStatusCompleted); err != nil {
 				return errors.InternalError("update task status", err)
@@ -89,7 +89,7 @@ func (c *ComplianceTask) Execute(ctx context.Context) error {
 			}
 		}
 	}
-	
+
 	return nil
 }
 
@@ -99,20 +99,20 @@ func (c *ComplianceTask) Validate(ctx context.Context) error {
 	if err := c.BaseTask.Validate(ctx); err != nil {
 		return err
 	}
-	
+
 	// Compliance-specific validation
 	if c.TrainingProvider == "" {
 		return errors.ValidationError("training provider is required")
 	}
-	
+
 	if c.DueDate.IsZero() {
 		return errors.ValidationError("due date is required")
 	}
-	
+
 	if c.DueDate.Before(time.Now()) {
 		return errors.ValidationError("due date cannot be in the past")
 	}
-	
+
 	return nil
 }
 
@@ -136,14 +136,14 @@ func (c *ComplianceTask) GetDaysUntilDue() int {
 	if c.IsComplete() {
 		return 0
 	}
-	
+
 	duration := c.DueDate.Sub(time.Now())
 	days := int(duration.Hours() / 24)
-	
+
 	if days < 0 {
 		return 0
 	}
-	
+
 	return days
 }
 
@@ -155,10 +155,10 @@ func (c *ComplianceTask) GetComplianceMetadata() map[string]interface{} {
 	metadata["due_date"] = c.DueDate
 	metadata["is_overdue"] = c.IsOverdue()
 	metadata["days_until_due"] = c.GetDaysUntilDue()
-	
+
 	if c.CertificateID != "" {
 		metadata["certificate_id"] = c.CertificateID
 	}
-	
+
 	return metadata
 }

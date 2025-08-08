@@ -21,8 +21,8 @@ func (c *Shared) UserSelectorRefactored(triggerID, channel string) {
 		AddUserSelect("update_user", "User", "users_select", nil, false).
 		BuildModal(
 			c.constFormat(UpdateUserSelector),
-			channel,        // External ID
-			triggerID,      // Private metadata
+			channel,   // External ID
+			triggerID, // Private metadata
 		)
 
 	vr, err := c.bot.Bot().SlackClient().OpenView(triggerID, modalRequest)
@@ -37,10 +37,10 @@ func (c *Shared) UserSelectorRefactored(triggerID, channel string) {
 // ComplianceCheckerRefactored demonstrates improved error handling and cleaner code
 func (c *Shared) ComplianceCheckerRefactored(ctx *slacker.InteractionContext) {
 	action := ctx.Callback().ActionCallback.AttachmentActions[0]
-	
+
 	// Delete the original message
 	if _, _, err := c.bot.Bot().SlackClient().DeleteMessage(
-		ctx.Callback().Channel.ID, 
+		ctx.Callback().Channel.ID,
 		ctx.Callback().MessageTs,
 	); err != nil {
 		c.log.Info().Err(errors.SlackError("delete compliance message", err)).
@@ -54,10 +54,10 @@ func (c *Shared) ComplianceCheckerRefactored(ctx *slacker.InteractionContext) {
 	// Check compliance status
 	userID := ctx.Callback().User.ID
 	compliant, err := c.impl.CheckComplianceStatus(userID)
-	
+
 	// Determine the appropriate message
 	message := c.determineComplianceMessage(compliant, err)
-	
+
 	// Update compliance status if user is compliant
 	if compliant && err == nil {
 		if updateErr := c.caller.UserCompliant(userID); updateErr != nil {
@@ -83,7 +83,7 @@ func (c *Shared) ComplianceCheckerRefactored(ctx *slacker.InteractionContext) {
 func (c *Shared) determineComplianceMessage(compliant bool, err error) string {
 	if err != nil {
 		c.log.Info().Err(err).Bool("compliant", compliant).Msg("compliance check error")
-		
+
 		switch err.Error() {
 		case "no user found", "no_text":
 			return "✅"
@@ -101,7 +101,7 @@ func (c *Shared) determineComplianceMessage(compliant bool, err error) string {
 	if c.flags.TaskImplementation == string(implementation.OS) {
 		return "⚠️ You have not completed the required update. Please update your device and try again."
 	}
-	
+
 	return "⚠️ You have not completed the required training. Please complete the training and try again."
 }
 
@@ -112,11 +112,11 @@ func (c *Shared) WantUpdateUserRefactored(ch string) {
 		SetTitle("Update User").
 		SetClose("Cancel").
 		AddSection("Do you want to update a user's values?").
-		AddRadioButtons("update_choice", "Choose an option", "update_user_choice", 
+		AddRadioButtons("update_choice", "Choose an option", "update_user_choice",
 			[]ui.RadioOption{
 				{Text: "Yes", Value: UpdateUserYes, Desc: "Update user information"},
 				{Text: "No", Value: UpdateUserNo, Desc: "Cancel this operation"},
-			}, 
+			},
 			false,
 		).
 		BuildMessage()
@@ -149,7 +149,7 @@ func (c *Shared) UpdateUserInfoInteractiveRefactored() {
 						Err(errors.SystemError("command panic", nil)).
 						Interface("panic", r).
 						Msg("update user interactive command panicked")
-					
+
 					if err := ctx.Response().Reply("An unexpected error occurred. Please try again."); err != nil {
 						c.log.Error().Err(errors.SlackError("send panic message", err)).
 							Msg("failed to send error message")

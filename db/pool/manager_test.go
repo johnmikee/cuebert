@@ -60,15 +60,15 @@ func TestNewManager(t *testing.T) {
 		{
 			name: "valid config",
 			config: Config{
-				Host:            "localhost",
-				Port:            5432,
-				Database:        "testdb",
-				User:            "testuser",
-				Password:        "testpass",
-				MaxConns:        10,
-				MinConns:        2,
-				MaxConnLifetime: 1 * time.Hour,
-				MaxConnIdleTime: 30 * time.Minute,
+				Host:              "localhost",
+				Port:              5432,
+				Database:          "testdb",
+				User:              "testuser",
+				Password:          "testpass",
+				MaxConns:          10,
+				MinConns:          2,
+				MaxConnLifetime:   1 * time.Hour,
+				MaxConnIdleTime:   30 * time.Minute,
 				HealthCheckPeriod: 1 * time.Minute,
 			},
 			wantErr: false,
@@ -101,7 +101,7 @@ func TestNewManager(t *testing.T) {
 			// Since we can't actually connect to a database in unit tests,
 			// we'll test the validation logic
 			err := validateConfig(tt.config)
-			
+
 			if tt.wantErr {
 				assert.Error(t, err)
 				if tt.errMsg != "" {
@@ -140,7 +140,7 @@ func TestManager_HealthCheck(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			mockPool := new(MockPool)
 			tt.setupMock(mockPool)
-			
+
 			manager := &Manager{
 				pool: mockPool,
 				log:  logger.NewTestLogger(),
@@ -148,18 +148,18 @@ func TestManager_HealthCheck(t *testing.T) {
 					HealthCheckPeriod: 1 * time.Minute,
 				},
 			}
-			
+
 			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 			defer cancel()
-			
+
 			err := manager.HealthCheck(ctx)
-			
+
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)
 			}
-			
+
 			mockPool.AssertExpectations(t)
 		})
 	}
@@ -167,31 +167,31 @@ func TestManager_HealthCheck(t *testing.T) {
 
 func TestManager_GetMetrics(t *testing.T) {
 	mockPool := new(MockPool)
-	
+
 	expectedStat := &pgxpool.Stat{
-		AcquireCount:         100,
-		AcquireDuration:      5 * time.Second,
-		AcquiredConns:        5,
-		CanceledAcquireCount: 2,
-		ConstructingConns:    1,
-		EmptyAcquireCount:    10,
-		IdleConns:            3,
-		MaxConns:             10,
-		TotalConns:           8,
-		NewConnsCount:        20,
+		AcquireCount:            100,
+		AcquireDuration:         5 * time.Second,
+		AcquiredConns:           5,
+		CanceledAcquireCount:    2,
+		ConstructingConns:       1,
+		EmptyAcquireCount:       10,
+		IdleConns:               3,
+		MaxConns:                10,
+		TotalConns:              8,
+		NewConnsCount:           20,
 		MaxLifetimeDestroyCount: 5,
 		MaxIdleDestroyCount:     3,
 	}
-	
+
 	mockPool.On("Stat").Return(expectedStat)
-	
+
 	manager := &Manager{
 		pool: mockPool,
 		log:  logger.NewTestLogger(),
 	}
-	
+
 	metrics := manager.GetMetrics()
-	
+
 	assert.Equal(t, int32(8), metrics.TotalConnections)
 	assert.Equal(t, int32(3), metrics.IdleConnections)
 	assert.Equal(t, int32(5), metrics.ActiveConnections)
@@ -200,28 +200,28 @@ func TestManager_GetMetrics(t *testing.T) {
 	assert.Equal(t, 5*time.Second, metrics.AcquireDuration)
 	assert.Equal(t, int64(2), metrics.CanceledAcquireCount)
 	assert.Equal(t, 62.5, metrics.ConnectionUtilization) // (5/8) * 100
-	
+
 	mockPool.AssertExpectations(t)
 }
 
 func TestManager_Close(t *testing.T) {
 	mockPool := new(MockPool)
 	mockPool.On("Close").Return()
-	
+
 	manager := &Manager{
 		pool:   mockPool,
 		log:    logger.NewTestLogger(),
 		closed: false,
 	}
-	
+
 	// First close should succeed
 	manager.Close()
 	assert.True(t, manager.closed)
-	
+
 	// Second close should be idempotent
 	manager.Close()
 	assert.True(t, manager.closed)
-	
+
 	// Verify Close was called only once
 	mockPool.AssertNumberOfCalls(t, "Close", 1)
 }
@@ -233,7 +233,7 @@ func TestManager_WithTimeout(t *testing.T) {
 			DefaultQueryTimeout: 30 * time.Second,
 		},
 	}
-	
+
 	tests := []struct {
 		name     string
 		timeout  time.Duration
@@ -250,16 +250,16 @@ func TestManager_WithTimeout(t *testing.T) {
 			expected: 30 * time.Second,
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ctx := context.Background()
 			newCtx, cancel := manager.WithTimeout(ctx, tt.timeout)
 			defer cancel()
-			
+
 			deadline, ok := newCtx.Deadline()
 			assert.True(t, ok)
-			
+
 			// Check that deadline is approximately correct
 			expectedDeadline := time.Now().Add(tt.expected)
 			diff := deadline.Sub(expectedDeadline).Abs()
@@ -273,28 +273,28 @@ func TestManager_Transaction(t *testing.T) {
 		manager := &Manager{
 			log: logger.NewTestLogger(),
 		}
-		
+
 		executed := false
 		err := manager.Transaction(context.Background(), func(ctx context.Context, tx pgx.Tx) error {
 			executed = true
 			return nil
 		})
-		
+
 		// In a real test, this would use a mock transaction
 		// For now, we just verify the structure is correct
-		assert.Error(t, err) // Will error because pool is nil
+		assert.Error(t, err)      // Will error because pool is nil
 		assert.False(t, executed) // Won't execute because Begin will fail
 	})
-	
+
 	t.Run("transaction with error", func(t *testing.T) {
 		manager := &Manager{
 			log: logger.NewTestLogger(),
 		}
-		
+
 		err := manager.Transaction(context.Background(), func(ctx context.Context, tx pgx.Tx) error {
 			return assert.AnError
 		})
-		
+
 		assert.Error(t, err)
 	})
 }
@@ -304,11 +304,11 @@ func validateConfig(cfg Config) error {
 	if cfg.Host == "" || cfg.Port == 0 || cfg.Database == "" || cfg.User == "" {
 		return assert.AnError // Simplified for testing
 	}
-	
+
 	if cfg.MaxConns <= 0 {
 		return assert.AnError
 	}
-	
+
 	return nil
 }
 
@@ -323,9 +323,9 @@ func TestMetrics_String(t *testing.T) {
 		CanceledAcquireCount:  2,
 		ConnectionUtilization: 35.0,
 	}
-	
+
 	str := metrics.String()
-	
+
 	assert.Contains(t, str, "Total: 10")
 	assert.Contains(t, str, "Active: 7")
 	assert.Contains(t, str, "Idle: 3")
@@ -367,11 +367,11 @@ func TestManager_Retry(t *testing.T) {
 			wantErr:       true,
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			callCount := 0
-			
+
 			manager := &Manager{
 				log: logger.NewTestLogger(),
 				config: Config{
@@ -379,7 +379,7 @@ func TestManager_Retry(t *testing.T) {
 					RetryDelay: tt.retryDelay,
 				},
 			}
-			
+
 			err := manager.Retry(context.Background(), func() error {
 				if callCount < len(tt.attempts) {
 					err := tt.attempts[callCount]
@@ -388,9 +388,9 @@ func TestManager_Retry(t *testing.T) {
 				}
 				return nil
 			})
-			
+
 			assert.Equal(t, tt.expectedCalls, callCount)
-			
+
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {
@@ -404,20 +404,20 @@ func TestManager_Retry(t *testing.T) {
 func BenchmarkGetMetrics(b *testing.B) {
 	mockPool := new(MockPool)
 	stat := &pgxpool.Stat{
-		AcquireCount:      1000,
-		AcquiredConns:     50,
-		IdleConns:         30,
-		TotalConns:        80,
-		MaxConns:          100,
+		AcquireCount:  1000,
+		AcquiredConns: 50,
+		IdleConns:     30,
+		TotalConns:    80,
+		MaxConns:      100,
 	}
-	
+
 	mockPool.On("Stat").Return(stat)
-	
+
 	manager := &Manager{
 		pool: mockPool,
 		log:  logger.NewTestLogger(),
 	}
-	
+
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		_ = manager.GetMetrics()

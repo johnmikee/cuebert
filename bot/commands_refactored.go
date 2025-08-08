@@ -252,13 +252,13 @@ func (c *CommandsRefactored) RegisterCommands(bot *slacker.Slacker) {
 						Err(errors.SystemError("command panic", nil)).
 						Interface("panic", r).
 						Msg("user command panicked")
-					
+
 					if err := ctx.Response().Reply("An unexpected error occurred. Please try again."); err != nil {
 						c.log.Error().Err(errors.SlackError("send panic message", err)).Msg("failed to send error message")
 					}
 				}
 			}()
-			
+
 			c.HandleUserLookup(ctx)
 		},
 	})
@@ -274,13 +274,13 @@ func (c *CommandsRefactored) RegisterCommands(bot *slacker.Slacker) {
 						Err(errors.SystemError("command panic", nil)).
 						Interface("panic", r).
 						Msg("status command panicked")
-					
+
 					if err := ctx.Response().Reply("An unexpected error occurred. Please try again."); err != nil {
 						c.log.Error().Err(errors.SlackError("send panic message", err)).Msg("failed to send error message")
 					}
 				}
 			}()
-			
+
 			c.HandleTaskStatus(ctx)
 		},
 	})
@@ -297,13 +297,13 @@ func (c *CommandsRefactored) RegisterCommands(bot *slacker.Slacker) {
 						Err(errors.SystemError("command panic", nil)).
 						Interface("panic", r).
 						Msg("complete command panicked")
-					
+
 					if err := ctx.Response().Reply("An unexpected error occurred. Please try again."); err != nil {
 						c.log.Error().Err(errors.SlackError("send panic message", err)).Msg("failed to send error message")
 					}
 				}
 			}()
-			
+
 			c.HandleCompleteTask(ctx)
 		},
 	})

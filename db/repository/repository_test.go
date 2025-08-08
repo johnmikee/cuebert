@@ -56,9 +56,9 @@ func TestRepository_Create(t *testing.T) {
 		{
 			name: "successful create",
 			entity: TestEntity{
-				ID:    "test-123",
-				Name:  "Test User",
-				Email: "test@example.com",
+				ID:     "test-123",
+				Name:   "Test User",
+				Email:  "test@example.com",
 				Active: true,
 			},
 			setup: func(db *MockDB) {
@@ -89,7 +89,7 @@ func TestRepository_Create(t *testing.T) {
 			// Setup
 			mockDB := new(MockDB)
 			tt.setup(mockDB)
-			
+
 			repo := &repository[TestEntity]{
 				db:         mockDB,
 				log:        logger.NewTestLogger(),
@@ -117,12 +117,12 @@ func TestRepository_Create(t *testing.T) {
 
 func TestRepository_FindByID(t *testing.T) {
 	tests := []struct {
-		name     string
-		id       string
-		setup    func(*MockDB)
-		want     *TestEntity
-		wantErr  bool
-		errMsg   string
+		name    string
+		id      string
+		setup   func(*MockDB)
+		want    *TestEntity
+		wantErr bool
+		errMsg  string
 	}{
 		{
 			name: "find existing entity",
@@ -171,7 +171,7 @@ func TestRepository_FindByID(t *testing.T) {
 			// Setup
 			mockDB := new(MockDB)
 			tt.setup(mockDB)
-			
+
 			repo := &repository[TestEntity]{
 				db:         mockDB,
 				log:        logger.NewTestLogger(),
@@ -244,7 +244,7 @@ func TestRepository_Update(t *testing.T) {
 			// Setup
 			mockDB := new(MockDB)
 			tt.setup(mockDB)
-			
+
 			repo := &repository[TestEntity]{
 				db:         mockDB,
 				log:        logger.NewTestLogger(),
@@ -305,7 +305,7 @@ func TestRepository_Delete(t *testing.T) {
 			// Setup
 			mockDB := new(MockDB)
 			tt.setup(mockDB)
-			
+
 			repo := &repository[TestEntity]{
 				db:         mockDB,
 				log:        logger.NewTestLogger(),
@@ -383,7 +383,7 @@ func TestRepository_FindAll(t *testing.T) {
 			// Setup
 			mockDB := new(MockDB)
 			tt.setup(mockDB)
-			
+
 			repo := &repository[TestEntity]{
 				db:         mockDB,
 				log:        logger.NewTestLogger(),
@@ -422,7 +422,7 @@ func (m *MockRows) Scan(dest ...interface{}) error {
 	if m.index > len(m.data) || m.index < 1 {
 		return assert.AnError
 	}
-	
+
 	row := m.data[m.index-1]
 	// Simplified scan implementation for testing
 	// In real implementation, this would use reflection to populate dest
@@ -439,6 +439,6 @@ func (m *MockRows) Err() error {
 
 // Helper function
 func contains(s, substr string) bool {
-	return len(s) > 0 && len(substr) > 0 && len(s) >= len(substr) && 
+	return len(s) > 0 && len(substr) > 0 && len(s) >= len(substr) &&
 		(s == substr || len(s) > len(substr))
 }

@@ -26,7 +26,7 @@ type ReminderRefactored struct {
 func (c *Shared) DeliverReminderRefactored(r *ReminderRefactored) error {
 	// Build the reminder message using UI builder for consistency
 	builder := ui.New()
-	
+
 	// Create a rich message block instead of legacy attachments
 	blocks := []slack.Block{
 		slack.NewHeaderBlock(
@@ -43,10 +43,10 @@ func (c *Shared) DeliverReminderRefactored(r *ReminderRefactored) error {
 	if len(r.Fields) > 0 {
 		fields := make([]*slack.TextBlockObject, 0, len(r.Fields))
 		for _, field := range r.Fields {
-			fields = append(fields, slack.NewTextBlockObject("mrkdwn", 
+			fields = append(fields, slack.NewTextBlockObject("mrkdwn",
 				fmt.Sprintf("*%s*\n%s", field.Title, field.Value), false, false))
 		}
-		
+
 		blocks = append(blocks, slack.NewSectionBlock(nil, fields, nil))
 	}
 
@@ -63,7 +63,7 @@ func (c *Shared) DeliverReminderRefactored(r *ReminderRefactored) error {
 			slack.NewTextBlockObject("plain_text", "Remind Later", false, false),
 		),
 	}
-	
+
 	blocks = append(blocks, slack.NewActionBlock(c.constFormat(UserReminder), elements...))
 
 	// Send the message
@@ -71,7 +71,6 @@ func (c *Shared) DeliverReminderRefactored(r *ReminderRefactored) error {
 		r.User,
 		slack.MsgOptionBlocks(blocks...),
 	)
-	
 	if err != nil {
 		c.log.Error().
 			Err(errors.SlackError("post reminder message", err)).
@@ -109,7 +108,7 @@ func (c *Shared) ReminderPickerRefactored(triggerID, title string) {
 			Placeholder: fmt.Sprintf("Select date (e.g., %s)", tomorrow),
 			Optional:    false,
 		}).
-		AddTimePicker("time_picker", "Reminder Time", "time_picker", 
+		AddTimePicker("time_picker", "Reminder Time", "time_picker",
 			fmt.Sprintf("Select time (e.g., %s)", exampleTime), false).
 		AddContext("⏰ Times are in your local timezone").
 		BuildModal(c.constFormat(ReminderPicker), "", "")
@@ -127,10 +126,10 @@ func (c *Shared) ReminderPickerRefactored(triggerID, title string) {
 func (c *Shared) ReminderRequestedRefactored(ctx *slacker.InteractionContext) {
 	action := ctx.Callback().ActionCallback.AttachmentActions[0]
 	userID := ctx.Callback().User.ID
-	
+
 	// Delete the original message
 	if _, _, err := c.bot.Bot().SlackClient().DeleteMessage(
-		ctx.Callback().Channel.ID, 
+		ctx.Callback().Channel.ID,
 		ctx.Callback().MessageTs,
 	); err != nil {
 		c.log.Info().
@@ -180,7 +179,7 @@ func (c *Shared) ReminderSubmitRefactored(ctx *slacker.InteractionContext) {
 			Err(errors.DBError("get user timezone", err)).
 			Str("user_id", userID).
 			Msg("could not get user timezone")
-		
+
 		// Send error message to user
 		c.sendReminderError(userID, "Unable to set reminder: timezone not found")
 		return
@@ -196,9 +195,9 @@ func (c *Shared) ReminderSubmitRefactored(ctx *slacker.InteractionContext) {
 			Str("date", selectedDate).
 			Str("time", selectedTime).
 			Msg("invalid reminder time")
-		
+
 		// Reopen modal with error message
-		c.ReminderPickerRefactored(ctx.Callback().TriggerID, 
+		c.ReminderPickerRefactored(ctx.Callback().TriggerID,
 			"❌ Please select a future date and time")
 		return
 	}
@@ -209,9 +208,9 @@ func (c *Shared) ReminderSubmitRefactored(ctx *slacker.InteractionContext) {
 			Str("user_id", userID).
 			Time("selected_time", reminderTime).
 			Msg("user selected past time for reminder")
-		
+
 		// Reopen modal with error message
-		c.ReminderPickerRefactored(ctx.Callback().TriggerID, 
+		c.ReminderPickerRefactored(ctx.Callback().TriggerID,
 			"❌ Please select a future date and time")
 		return
 	}
@@ -223,7 +222,7 @@ func (c *Shared) ReminderSubmitRefactored(ctx *slacker.InteractionContext) {
 			Str("user_id", userID).
 			Time("reminder_time", reminderTime).
 			Msg("failed to set reminder")
-		
+
 		c.sendReminderError(userID, "Unable to set reminder. Please try again.")
 		return
 	}
@@ -236,13 +235,13 @@ func (c *Shared) ReminderSubmitRefactored(ctx *slacker.InteractionContext) {
 func (c *Shared) parseReminderTime(dateStr, timeStr string, loc *time.Location) (time.Time, error) {
 	// Combine date and time strings
 	dateTimeStr := fmt.Sprintf("%s %s", dateStr, timeStr)
-	
+
 	// Parse with the user's timezone
 	reminderTime, err := time.ParseInLocation("2006-01-02 15:04", dateTimeStr, loc)
 	if err != nil {
 		return time.Time{}, err
 	}
-	
+
 	return reminderTime, nil
 }
 
@@ -250,7 +249,7 @@ func (c *Shared) parseReminderTime(dateStr, timeStr string, loc *time.Location) 
 func (c *Shared) sendReminderError(userID, errorMsg string) {
 	blocks := []slack.Block{
 		slack.NewSectionBlock(
-			slack.NewTextBlockObject("mrkdwn", 
+			slack.NewTextBlockObject("mrkdwn",
 				fmt.Sprintf("❌ %s", errorMsg), false, false),
 			nil,
 			nil,
@@ -272,19 +271,19 @@ func (c *Shared) sendReminderError(userID, errorMsg string) {
 func (c *Shared) sendReminderConfirmation(userID string, reminderTime time.Time, loc *time.Location) {
 	// Format the reminder time in user's timezone
 	formattedTime := reminderTime.In(loc).Format("Monday, January 2, 2006 at 3:04 PM MST")
-	
+
 	blocks := []slack.Block{
 		slack.NewHeaderBlock(
 			slack.NewTextBlockObject("plain_text", "✅ Reminder Set!", false, false),
 		),
 		slack.NewSectionBlock(
-			slack.NewTextBlockObject("mrkdwn", 
+			slack.NewTextBlockObject("mrkdwn",
 				fmt.Sprintf("I'll remind you on:\n*%s*", formattedTime), false, false),
 			nil,
 			nil,
 		),
 		slack.NewContextBlock("",
-			slack.NewTextBlockObject("mrkdwn", 
+			slack.NewTextBlockObject("mrkdwn",
 				"💡 _You can set another reminder when this one is sent_", false, false),
 		),
 	}
@@ -318,7 +317,7 @@ func (c *Shared) CreateReminderSettingsModal(userID string) slack.ModalViewReque
 		).
 		AddDivider().
 		AddHeader("⏰ Preferred Reminder Time").
-		AddTimePicker("preferred_time", "Default Time", "preferred_time_select", 
+		AddTimePicker("preferred_time", "Default Time", "preferred_time_select",
 			"9:00 AM", false).
 		AddDivider().
 		AddHeader("📧 Notification Settings").

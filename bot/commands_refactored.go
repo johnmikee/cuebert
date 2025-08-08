@@ -8,6 +8,7 @@ import (
 
 	"github.com/johnmikee/cuebert/db/repository"
 	"github.com/johnmikee/cuebert/pkg/errors"
+	"github.com/johnmikee/cuebert/pkg/logger"
 	"github.com/shomali11/slacker/v2"
 	"github.com/slack-go/slack"
 )
@@ -20,12 +21,12 @@ type CommandsRefactored struct {
 	log          logger.Logger
 }
 
-// HandleUserLookup demonstrates a refactored command handler with proper error handling
+// HandleUserLookup demonstrates a refactored command handler with proper error handling.
 func (c *CommandsRefactored) HandleUserLookup(ctx *slacker.CommandContext) {
 	// Extract user parameter with validation
 	userID := ctx.Request().StringParam("user", "")
 	if userID == "" {
-		if err := c.replyWithError(ctx, errors.ValidationError("user parameter is required")); err != nil {
+		if err := c.replyWithError(ctx, errors.ValidationError("user", "parameter is required")); err != nil {
 			c.log.Error().Err(errors.SlackError("send validation error", err)).Msg("failed to send error message")
 		}
 		return
@@ -38,7 +39,7 @@ func (c *CommandsRefactored) HandleUserLookup(ctx *slacker.CommandContext) {
 	// Look up user using repository
 	user, err := c.userRepo.FindBySlackID(reqCtx, userID)
 	if err != nil {
-		if errors.IsNotFound(err) {
+		if errors.Is(err, errors.ErrCodeDBNotFound) {
 			if err := c.replyWithError(ctx, errors.NotFoundError("user")); err != nil {
 				c.log.Error().Err(errors.SlackError("send not found error", err)).Msg("failed to send error message")
 			}
@@ -46,7 +47,7 @@ func (c *CommandsRefactored) HandleUserLookup(ctx *slacker.CommandContext) {
 		}
 
 		c.log.Error().Err(errors.DBError("find user", err)).Str("user_id", userID).Msg("database error")
-		if err := c.replyWithError(ctx, errors.InternalError("lookup user", err)); err != nil {
+		if err := c.replyWithError(ctx, errors.Wrap(err, errors.ErrCodeInternal, "lookup user")); err != nil {
 			c.log.Error().Err(errors.SlackError("send internal error", err)).Msg("failed to send error message")
 		}
 		return
@@ -54,7 +55,8 @@ func (c *CommandsRefactored) HandleUserLookup(ctx *slacker.CommandContext) {
 
 	// Format and send response
 	response := c.formatUserResponse(user)
-	if err := ctx.Response().Reply(response); err != nil {
+	_, err = ctx.Response().Reply(response)
+	if err != nil {
 		c.log.Error().
 			Err(errors.SlackError("send user info", err)).
 			Str("user_id", userID).
@@ -62,12 +64,12 @@ func (c *CommandsRefactored) HandleUserLookup(ctx *slacker.CommandContext) {
 	}
 }
 
-// HandleTaskStatus demonstrates error handling for task status checks
+// HandleTaskStatus demonstrates error handling for task status checks.
 func (c *CommandsRefactored) HandleTaskStatus(ctx *slacker.CommandContext) {
 	// Get user from context
 	event := ctx.Event()
 	if event.UserID == "" {
-		c.log.Error().Err(errors.ValidationError("no user ID in event")).Msg("invalid event")
+		c.log.Error().Err(errors.ValidationError("user ID", "not present in event")).Msg("invalid event")
 		return
 	}
 
@@ -82,14 +84,15 @@ func (c *CommandsRefactored) HandleTaskStatus(ctx *slacker.CommandContext) {
 			Str("user_id", event.UserID).
 			Msg("failed to get tracking records")
 
-		if err := c.replyWithError(ctx, errors.InternalError("fetch task status", err)); err != nil {
+		if err := c.replyWithError(ctx, errors.Wrap(err, errors.ErrCodeInternal, "fetch task status")); err != nil {
 			c.log.Error().Err(errors.SlackError("send error", err)).Msg("failed to send error message")
 		}
 		return
 	}
 
 	if len(trackingRecords) == 0 {
-		if err := ctx.Response().Reply("You have no active tasks."); err != nil {
+		_, err := ctx.Response().Reply("You have no active tasks.")
+		if err != nil {
 			c.log.Error().Err(errors.SlackError("send no tasks message", err)).Msg("failed to send message")
 		}
 		return
@@ -97,7 +100,8 @@ func (c *CommandsRefactored) HandleTaskStatus(ctx *slacker.CommandContext) {
 
 	// Build status message
 	blocks := c.buildTaskStatusBlocks(trackingRecords)
-	if err := ctx.Response().ReplyBlocks(blocks); err != nil {
+	_, err = ctx.Response().ReplyBlocks(blocks)
+	if err != nil {
 		c.log.Error().
 			Err(errors.SlackError("send task status", err)).
 			Str("user_id", event.UserID).
@@ -105,11 +109,11 @@ func (c *CommandsRefactored) HandleTaskStatus(ctx *slacker.CommandContext) {
 	}
 }
 
-// HandleCompleteTask demonstrates error handling for task completion
+// HandleCompleteTask demonstrates error handling for task completion.
 func (c *CommandsRefactored) HandleCompleteTask(ctx *slacker.CommandContext) {
 	taskName := ctx.Request().StringParam("task", "")
 	if taskName == "" {
-		if err := c.replyWithError(ctx, errors.ValidationError("task parameter is required")); err != nil {
+		if err := c.replyWithError(ctx, errors.ValidationError("task", "parameter is required")); err != nil {
 			c.log.Error().Err(errors.SlackError("send validation error", err)).Msg("failed to send error message")
 		}
 		return
@@ -122,7 +126,7 @@ func (c *CommandsRefactored) HandleCompleteTask(ctx *slacker.CommandContext) {
 	// Mark task as complete
 	err := c.trackingRepo.MarkTaskComplete(reqCtx, event.UserID, taskName)
 	if err != nil {
-		if errors.IsNotFound(err) {
+		if errors.Is(err, errors.ErrCodeDBNotFound) {
 			if err := c.replyWithError(ctx, errors.NotFoundError("task")); err != nil {
 				c.log.Error().Err(errors.SlackError("send not found error", err)).Msg("failed to send error message")
 			}
@@ -135,7 +139,7 @@ func (c *CommandsRefactored) HandleCompleteTask(ctx *slacker.CommandContext) {
 			Str("task", taskName).
 			Msg("failed to complete task")
 
-		if err := c.replyWithError(ctx, errors.InternalError("complete task", err)); err != nil {
+		if err := c.replyWithError(ctx, errors.Wrap(err, errors.ErrCodeInternal, "complete task")); err != nil {
 			c.log.Error().Err(errors.SlackError("send error", err)).Msg("failed to send error message")
 		}
 		return
@@ -143,7 +147,8 @@ func (c *CommandsRefactored) HandleCompleteTask(ctx *slacker.CommandContext) {
 
 	// Send success message
 	successMsg := fmt.Sprintf("✅ Task '%s' marked as complete!", taskName)
-	if err := ctx.Response().Reply(successMsg); err != nil {
+	_, err = ctx.Response().Reply(successMsg)
+	if err != nil {
 		c.log.Error().
 			Err(errors.SlackError("send success message", err)).
 			Msg("failed to send completion message")
@@ -156,25 +161,31 @@ func (c *CommandsRefactored) HandleCompleteTask(ctx *slacker.CommandContext) {
 		Msg("task completed successfully")
 }
 
-// replyWithError sends a user-friendly error message
+// replyWithError sends a user-friendly error message.
 func (c *CommandsRefactored) replyWithError(ctx *slacker.CommandContext, err error) error {
 	var message string
 
-	switch errors.GetType(err) {
-	case errors.NotFound:
-		message = fmt.Sprintf("❌ %s", err.Error())
-	case errors.Validation:
-		message = fmt.Sprintf("⚠️ Invalid input: %s", err.Error())
-	case errors.Permission:
-		message = "🚫 You don't have permission to perform this action."
-	default:
+	// Check error type using error codes
+	if appErr, ok := errors.As(err); ok {
+		switch appErr.Code {
+		case errors.ErrCodeNotFound, errors.ErrCodeDBNotFound:
+			message = fmt.Sprintf("❌ %s", err.Error())
+		case errors.ErrCodeValidation:
+			message = fmt.Sprintf("⚠️ Invalid input: %s", err.Error())
+		case errors.ErrCodePermission:
+			message = "🚫 You don't have permission to perform this action."
+		default:
+			message = "❌ An error occurred. Please try again later or contact support."
+		}
+	} else {
 		message = "❌ An error occurred. Please try again later or contact support."
 	}
 
-	return ctx.Response().Reply(message)
+	_, replyErr := ctx.Response().Reply(message)
+	return replyErr
 }
 
-// formatUserResponse formats user data for display
+// formatUserResponse formats user data for display.
 func (c *CommandsRefactored) formatUserResponse(user *repository.User) string {
 	var sb strings.Builder
 	sb.WriteString(fmt.Sprintf("*User Information*\n"))
@@ -182,13 +193,11 @@ func (c *CommandsRefactored) formatUserResponse(user *repository.User) string {
 	sb.WriteString(fmt.Sprintf("• Email: %s\n", user.UserEmail))
 	sb.WriteString(fmt.Sprintf("• Slack ID: %s\n", user.UserSlackID))
 	sb.WriteString(fmt.Sprintf("• Service ID: %s\n", user.UserServiceID))
-	if user.ManagerSlackID != "" {
-		sb.WriteString(fmt.Sprintf("• Manager: <@%s>\n", user.ManagerSlackID))
-	}
+	// Note: ManagerSlackID field may need to be added to the User model if manager tracking is needed
 	return sb.String()
 }
 
-// buildTaskStatusBlocks creates Slack blocks for task status display
+// buildTaskStatusBlocks creates Slack blocks for task status display.
 func (c *CommandsRefactored) buildTaskStatusBlocks(records []repository.Tracking) []slack.Block {
 	blocks := []slack.Block{
 		slack.NewHeaderBlock(
@@ -238,7 +247,7 @@ func (c *CommandsRefactored) buildTaskStatusBlocks(records []repository.Tracking
 	return blocks
 }
 
-// Example of how to register these commands with proper error handling
+// Example of how to register these commands with proper error handling.
 func (c *CommandsRefactored) RegisterCommands(bot *slacker.Slacker) {
 	// User lookup command
 	bot.AddCommand(&slacker.CommandDefinition{
@@ -249,11 +258,12 @@ func (c *CommandsRefactored) RegisterCommands(bot *slacker.Slacker) {
 			defer func() {
 				if r := recover(); r != nil {
 					c.log.Error().
-						Err(errors.SystemError("command panic", nil)).
+						Err(errors.New(errors.ErrCodeInternal, "command panic")).
 						Interface("panic", r).
 						Msg("user command panicked")
 
-					if err := ctx.Response().Reply("An unexpected error occurred. Please try again."); err != nil {
+					_, err := ctx.Response().Reply("An unexpected error occurred. Please try again.")
+					if err != nil {
 						c.log.Error().Err(errors.SlackError("send panic message", err)).Msg("failed to send error message")
 					}
 				}
@@ -271,11 +281,12 @@ func (c *CommandsRefactored) RegisterCommands(bot *slacker.Slacker) {
 			defer func() {
 				if r := recover(); r != nil {
 					c.log.Error().
-						Err(errors.SystemError("command panic", nil)).
+						Err(errors.New(errors.ErrCodeInternal, "command panic")).
 						Interface("panic", r).
 						Msg("status command panicked")
 
-					if err := ctx.Response().Reply("An unexpected error occurred. Please try again."); err != nil {
+					_, err := ctx.Response().Reply("An unexpected error occurred. Please try again.")
+					if err != nil {
 						c.log.Error().Err(errors.SlackError("send panic message", err)).Msg("failed to send error message")
 					}
 				}
@@ -294,11 +305,12 @@ func (c *CommandsRefactored) RegisterCommands(bot *slacker.Slacker) {
 			defer func() {
 				if r := recover(); r != nil {
 					c.log.Error().
-						Err(errors.SystemError("command panic", nil)).
+						Err(errors.New(errors.ErrCodeInternal, "command panic")).
 						Interface("panic", r).
 						Msg("complete command panicked")
 
-					if err := ctx.Response().Reply("An unexpected error occurred. Please try again."); err != nil {
+					_, err := ctx.Response().Reply("An unexpected error occurred. Please try again.")
+					if err != nil {
 						c.log.Error().Err(errors.SlackError("send panic message", err)).Msg("failed to send error message")
 					}
 				}

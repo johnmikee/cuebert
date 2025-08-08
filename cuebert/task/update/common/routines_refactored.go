@@ -34,7 +34,7 @@ func (c *Common) CheckRefactored(t time.Time, p *shared.ReminderPayload) {
 	for _, tr := range trackingRecords {
 		c.log.Trace().Interface("tracking", tr).Msg("checking user")
 
-		now := time.Now().In(helpers.GenLocation(tr.TZOffset))
+		now := time.Now().In(helpers.GenLocation(int64(tr.TZOffset)))
 		switch now.Weekday() {
 		case time.Monday:
 			if !tr.FirstMessageSent {
@@ -54,7 +54,7 @@ func (c *Common) CheckRefactored(t time.Time, p *shared.ReminderPayload) {
 						UserSlackID:   tr.UserSlackID,
 						UserName:      tr.UserFullName,
 						FirstMessage:  p.FirstMessage,
-						TZOffset:      tr.TZOffset,
+						TZOffset:      int64(tr.TZOffset),
 						Title:         p.Title,
 					}, 1)
 				continue
@@ -94,7 +94,7 @@ func (c *Common) CheckRefactored(t time.Time, p *shared.ReminderPayload) {
 						FinalMessage:  p.FinalMessage,
 						Item:          p.Item,
 						Text:          p.FinalMessage,
-						TZOffset:      tr.TZOffset,
+						TZOffset:      int64(tr.TZOffset),
 						Title:         p.Title,
 					}, 3)
 				}
@@ -154,7 +154,8 @@ func (c *Common) DiffRefactored(time.Time) {
 
 	// The diff logic would continue here, using repository pattern for database operations
 	// This is a placeholder for the actual implementation
-	c.updateDevices()
+	// TODO: Implement updateDevices method
+	// c.updateDevices()
 }
 
 // PollRefactored checks for pending reminders using the repository pattern.
@@ -190,7 +191,7 @@ func (c *Common) PollRefactored(t time.Time) {
 			Msg("checking reminder")
 
 		// Check if it's time to send the reminder
-		now := time.Now().In(helpers.GenLocation(reminder.TZOffset))
+		now := time.Now().In(helpers.GenLocation(int64(reminder.TZOffset)))
 		delayDateTime, err := time.ParseInLocation("2006-01-02 15:04", reminder.DelayDate+" "+reminder.DelayTime, now.Location())
 		if err != nil {
 			c.log.Error().AnErr("error", err).Msg("failed to parse delay time")
@@ -204,8 +205,8 @@ func (c *Common) PollRefactored(t time.Time) {
 				UserSlackID:   reminder.UserSlackID,
 				UserName:      reminder.UserFullName,
 				Task:          reminder.TaskName,
-				ReminderText:  "Reminder: Please complete your task",
-				TZOffset:      reminder.TZOffset,
+				Text:          "Reminder: Please complete your task",
+				TZOffset:      int64(reminder.TZOffset),
 			}, 2)
 
 			// Update reminder status

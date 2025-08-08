@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// MockPool is a mock implementation of pgxpool.Pool for testing
+// MockPool is a mock implementation of pgxpool.Pool for testing.
 type MockPool struct {
 	mock.Mock
 }
@@ -299,7 +299,7 @@ func TestManager_Transaction(t *testing.T) {
 	})
 }
 
-// Helper function to validate config (extracted from actual implementation)
+// Helper function to validate config (extracted from actual implementation).
 func validateConfig(cfg Config) error {
 	if cfg.Host == "" || cfg.Port == 0 || cfg.Database == "" || cfg.User == "" {
 		return assert.AnError // Simplified for testing
@@ -400,7 +400,7 @@ func TestManager_Retry(t *testing.T) {
 	}
 }
 
-// BenchmarkGetMetrics benchmarks the GetMetrics method
+// BenchmarkGetMetrics benchmarks the GetMetrics method.
 func BenchmarkGetMetrics(b *testing.B) {
 	mockPool := new(MockPool)
 	stat := &pgxpool.Stat{

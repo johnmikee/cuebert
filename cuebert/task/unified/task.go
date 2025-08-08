@@ -8,7 +8,7 @@ import (
 	"github.com/johnmikee/cuebert/pkg/logger"
 )
 
-// TaskType represents the type of task (compliance or update)
+// TaskType represents the type of task (compliance or update).
 type TaskType string
 
 const (
@@ -16,7 +16,7 @@ const (
 	TaskTypeUpdate     TaskType = "update"
 )
 
-// TaskStatus represents the current status of a task
+// TaskStatus represents the current status of a task.
 type TaskStatus string
 
 const (
@@ -27,7 +27,7 @@ const (
 	TaskStatusExcluded   TaskStatus = "excluded"
 )
 
-// Task represents a unified task interface for both compliance and update tasks
+// Task represents a unified task interface for both compliance and update tasks.
 type Task interface {
 	// Identification
 	GetID() string
@@ -59,7 +59,7 @@ type Task interface {
 	SetMetadata(key string, value interface{})
 }
 
-// BaseTask provides common functionality for all task types
+// BaseTask provides common functionality for all task types.
 type BaseTask struct {
 	// Core fields
 	ID          string   `json:"id" db:"id"`
@@ -96,42 +96,42 @@ type BaseTask struct {
 	log logger.Logger
 }
 
-// GetID returns the task ID
+// GetID returns the task ID.
 func (t *BaseTask) GetID() string {
 	return t.ID
 }
 
-// GetType returns the task type
+// GetType returns the task type.
 func (t *BaseTask) GetType() TaskType {
 	return t.Type
 }
 
-// GetName returns the task name
+// GetName returns the task name.
 func (t *BaseTask) GetName() string {
 	return t.Name
 }
 
-// GetDescription returns the task description
+// GetDescription returns the task description.
 func (t *BaseTask) GetDescription() string {
 	return t.Description
 }
 
-// GetUserID returns the user ID
+// GetUserID returns the user ID.
 func (t *BaseTask) GetUserID() string {
 	return t.UserID
 }
 
-// GetUserEmail returns the user email
+// GetUserEmail returns the user email.
 func (t *BaseTask) GetUserEmail() string {
 	return t.UserEmail
 }
 
-// GetStatus returns the current task status
+// GetStatus returns the current task status.
 func (t *BaseTask) GetStatus() TaskStatus {
 	return t.Status
 }
 
-// SetStatus updates the task status
+// SetStatus updates the task status.
 func (t *BaseTask) SetStatus(status TaskStatus) error {
 	oldStatus := t.Status
 	t.Status = status
@@ -152,27 +152,27 @@ func (t *BaseTask) SetStatus(status TaskStatus) error {
 	return nil
 }
 
-// IsComplete returns whether the task is complete
+// IsComplete returns whether the task is complete.
 func (t *BaseTask) IsComplete() bool {
 	return t.Status == TaskStatusCompleted
 }
 
-// GetCompletedAt returns the completion time
+// GetCompletedAt returns the completion time.
 func (t *BaseTask) GetCompletedAt() *time.Time {
 	return t.CompletedAt
 }
 
-// NeedsFirstMessage checks if the first message needs to be sent
+// NeedsFirstMessage checks if the first message needs to be sent.
 func (t *BaseTask) NeedsFirstMessage() bool {
 	return !t.FirstMessageSent && !t.IsComplete() && t.Status != TaskStatusExcluded
 }
 
-// NeedsFinalMessage checks if the final message needs to be sent
+// NeedsFinalMessage checks if the final message needs to be sent.
 func (t *BaseTask) NeedsFinalMessage() bool {
 	return t.FirstMessageSent && !t.FinalMessageSent && !t.IsComplete() && t.Status != TaskStatusExcluded
 }
 
-// NeedsReminder checks if a reminder needs to be sent
+// NeedsReminder checks if a reminder needs to be sent.
 func (t *BaseTask) NeedsReminder() bool {
 	if !t.ReminderEnabled || t.IsComplete() || t.Status == TaskStatusExcluded {
 		return false
@@ -185,7 +185,7 @@ func (t *BaseTask) NeedsReminder() bool {
 	return time.Now().After(*t.NextReminderAt)
 }
 
-// GetMetadata returns the task metadata
+// GetMetadata returns the task metadata.
 func (t *BaseTask) GetMetadata() map[string]interface{} {
 	if t.Metadata == nil {
 		t.Metadata = make(map[string]interface{})
@@ -193,7 +193,7 @@ func (t *BaseTask) GetMetadata() map[string]interface{} {
 	return t.Metadata
 }
 
-// SetMetadata sets a metadata value
+// SetMetadata sets a metadata value.
 func (t *BaseTask) SetMetadata(key string, value interface{}) {
 	if t.Metadata == nil {
 		t.Metadata = make(map[string]interface{})
@@ -201,7 +201,7 @@ func (t *BaseTask) SetMetadata(key string, value interface{}) {
 	t.Metadata[key] = value
 }
 
-// Validate performs basic validation
+// Validate performs basic validation.
 func (t *BaseTask) Validate(ctx context.Context) error {
 	if t.ID == "" {
 		return errors.ValidationError("task ID is required")

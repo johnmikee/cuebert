@@ -8,7 +8,6 @@ import (
 	"github.com/johnmikee/cuebert/cuebert/task/update/db/tracking"
 	"github.com/johnmikee/cuebert/handlers"
 	"github.com/johnmikee/cuebert/pkg/helpers"
-	"github.com/lib/pq"
 )
 
 // Check pulls from the bot results table to see if and when users need to be reminded to update their devices.
@@ -190,7 +189,8 @@ func (c *Common) Diff(time.Time) {
 	// Use safe query builder to prevent SQL injection
 	safeQueries := NewSafeQueries()
 	tableName := c.tables.Tracking().Table()
-	rowsAffected, err := safeQueries.DeleteTrackingRecords(context.Background(), c.tables.Pool(), tableName, remove)
+	poolAdapter := NewPgxPoolAdapter(c.tables.Pool())
+	rowsAffected, err := safeQueries.DeleteTrackingRecords(context.Background(), poolAdapter, tableName, remove)
 	if err != nil {
 		c.log.Debug().AnErr("removing devices from tracking table", err).Send()
 		return

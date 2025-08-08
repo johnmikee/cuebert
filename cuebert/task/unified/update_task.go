@@ -9,7 +9,7 @@ import (
 	"github.com/johnmikee/cuebert/pkg/logger"
 )
 
-// UpdateTask represents an OS or software update task
+// UpdateTask represents an OS or software update task.
 type UpdateTask struct {
 	BaseTask
 
@@ -26,7 +26,7 @@ type UpdateTask struct {
 	checkUpdate func(ctx context.Context, deviceID string) (bool, string, error)
 }
 
-// NewUpdateTask creates a new update task
+// NewUpdateTask creates a new update task.
 func NewUpdateTask(
 	id, userID, userEmail, userFullName string,
 	deviceID, deviceSerial, deviceOS, currentVersion, targetVersion string,
@@ -60,7 +60,7 @@ func NewUpdateTask(
 	}
 }
 
-// Execute runs the update check
+// Execute runs the update check.
 func (u *UpdateTask) Execute(ctx context.Context) error {
 	u.log.Info().
 		Str("task_id", u.ID).
@@ -114,7 +114,7 @@ func (u *UpdateTask) Execute(ctx context.Context) error {
 	return nil
 }
 
-// Validate checks if the update task is valid
+// Validate checks if the update task is valid.
 func (u *UpdateTask) Validate(ctx context.Context) error {
 	// Run base validation
 	if err := u.BaseTask.Validate(ctx); err != nil {
@@ -141,22 +141,22 @@ func (u *UpdateTask) Validate(ctx context.Context) error {
 	return nil
 }
 
-// SetUpdateChecker sets the update checking function
+// SetUpdateChecker sets the update checking function.
 func (u *UpdateTask) SetUpdateChecker(checker func(ctx context.Context, deviceID string) (bool, string, error)) {
 	u.checkUpdate = checker
 }
 
-// GetDeadline returns the update deadline
+// GetDeadline returns the update deadline.
 func (u *UpdateTask) GetDeadline() time.Time {
 	return u.Deadline
 }
 
-// IsOverdue checks if the update is overdue
+// IsOverdue checks if the update is overdue.
 func (u *UpdateTask) IsOverdue() bool {
 	return !u.IsComplete() && time.Now().After(u.Deadline)
 }
 
-// GetDaysUntilDeadline returns the number of days until the deadline
+// GetDaysUntilDeadline returns the number of days until the deadline.
 func (u *UpdateTask) GetDaysUntilDeadline() int {
 	if u.IsComplete() {
 		return 0
@@ -172,12 +172,12 @@ func (u *UpdateTask) GetDaysUntilDeadline() int {
 	return days
 }
 
-// NeedsUpdate checks if the device still needs the update
+// NeedsUpdate checks if the device still needs the update.
 func (u *UpdateTask) NeedsUpdate() bool {
 	return u.CurrentVersion != u.TargetVersion && !u.IsComplete()
 }
 
-// GetUpdateMetadata returns update-specific metadata
+// GetUpdateMetadata returns update-specific metadata.
 func (u *UpdateTask) GetUpdateMetadata() map[string]interface{} {
 	metadata := u.GetMetadata()
 	metadata["device_id"] = u.DeviceID

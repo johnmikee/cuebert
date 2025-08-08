@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// MockDB is a mock database connection for testing
+// MockDB is a mock database connection for testing.
 type MockDB struct {
 	mock.Mock
 }
@@ -35,7 +35,7 @@ func (m *MockDB) Exec(ctx context.Context, sql string, args ...interface{}) (pgx
 	return argList.Get(0).(pgx.CommandTag), argList.Error(1)
 }
 
-// Test entity for repository tests
+// Test entity for repository tests.
 type TestEntity struct {
 	ID        string    `db:"id" json:"id"`
 	Name      string    `db:"name" json:"name"`
@@ -407,7 +407,7 @@ func TestRepository_FindAll(t *testing.T) {
 	}
 }
 
-// MockRows implements a simplified pgx.Rows interface for testing
+// MockRows implements a simplified pgx.Rows interface for testing.
 type MockRows struct {
 	data  []map[string]interface{}
 	index int
@@ -437,7 +437,7 @@ func (m *MockRows) Err() error {
 	return nil
 }
 
-// Helper function
+// Helper function.
 func contains(s, substr string) bool {
 	return len(s) > 0 && len(substr) > 0 && len(s) >= len(substr) &&
 		(s == substr || len(s) > len(substr))

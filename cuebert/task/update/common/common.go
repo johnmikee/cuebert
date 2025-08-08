@@ -2,7 +2,6 @@ package common
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 	"time"
 
@@ -18,7 +17,6 @@ import (
 	"github.com/johnmikee/cuebert/idp/client"
 	"github.com/johnmikee/cuebert/mdm"
 	mdmclient "github.com/johnmikee/cuebert/mdm/client"
-	"github.com/johnmikee/cuebert/pkg/helpers"
 	"github.com/johnmikee/cuebert/pkg/logger"
 	"github.com/slack-go/slack"
 )
@@ -41,7 +39,8 @@ func (c *Common) FirstMessageDelivered(serviceID, slackID string) error {
 	// Use safe query builder to prevent SQL injection
 	safeQueries := NewSafeQueries()
 	tableName := c.tables.Tracking().Table()
-	return safeQueries.UpdateFirstMessageDelivered(context.Background(), c.tables.Pool(), tableName, slackID)
+	poolAdapter := NewPgxPoolAdapter(c.tables.Pool())
+	return safeQueries.UpdateFirstMessageDelivered(context.Background(), poolAdapter, tableName, slackID)
 }
 
 // FirstMessageSent implements shared.Caller.
@@ -49,7 +48,8 @@ func (c *Common) FirstMessageSent(serviceID string, slackID string) error {
 	// Use safe query builder to prevent SQL injection
 	safeQueries := NewSafeQueries()
 	tableName := c.tables.Tracking().Table()
-	return safeQueries.UpdateFirstMessageSent(context.Background(), c.tables.Pool(), tableName, slackID)
+	poolAdapter := NewPgxPoolAdapter(c.tables.Pool())
+	return safeQueries.UpdateFirstMessageSent(context.Background(), poolAdapter, tableName, slackID)
 }
 
 // FinalMessageSent implements shared.Caller.
@@ -57,7 +57,8 @@ func (c *Common) FinalMessageSent(serviceID string, slackID string) error {
 	// Use safe query builder to prevent SQL injection
 	safeQueries := NewSafeQueries()
 	tableName := c.tables.Tracking().Table()
-	return safeQueries.UpdateFinalMessageSent(context.Background(), c.tables.Pool(), tableName, slackID)
+	poolAdapter := NewPgxPoolAdapter(c.tables.Pool())
+	return safeQueries.UpdateFinalMessageSent(context.Background(), poolAdapter, tableName, slackID)
 }
 
 // ReminderMessage delivers the reminder message.

@@ -41,7 +41,7 @@ func mainRefactored() {
 	c, err := setupRefactored()
 	if err != nil {
 		// Since we don't have logger yet, use standard error
-		panic(errors.InitializationError("setup", err))
+		panic(errors.Wrap(err, errors.ErrCodeInternal, "initialization failed"))
 	}
 
 	if c.flags.MakeMigrations {
@@ -54,7 +54,7 @@ func mainRefactored() {
 
 	if runtime.GOOS == "linux" {
 		if _, err := maxprocs.Set(maxprocs.Logger(c.log.Printf)); err != nil {
-			c.log.Error().Err(errors.SystemError("set GOMAXPROCS", err)).Msg("cannot set GOMAXPROCS")
+			c.log.Error().Err(errors.Wrap(err, errors.ErrCodeInternal, "set GOMAXPROCS")).Msg("cannot set GOMAXPROCS")
 		}
 	}
 
@@ -65,7 +65,7 @@ func mainRefactored() {
 		defer func() {
 			if r := recover(); r != nil {
 				c.log.Error().
-					Err(errors.SystemError("handler panic", nil)).
+					Err(errors.New(errors.ErrCodeInternal, "handler panic")).
 					Interface("panic", r).
 					Msg("handler goroutine panicked")
 			}
@@ -91,7 +91,7 @@ func mainRefactored() {
 		defer func() {
 			if r := recover(); r != nil {
 				c.log.Error().
-					Err(errors.SystemError("monitor panic", nil)).
+					Err(errors.New(errors.ErrCodeInternal, "monitor panic")).
 					Interface("panic", r).
 					Msg("monitor goroutine panicked")
 			}
@@ -100,7 +100,7 @@ func mainRefactored() {
 	}()
 
 	// Populate tracking table with better error handling
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+	_, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 	defer cancel()
 
 	if err := c.task.Populate(time.Now()); err != nil {
@@ -133,13 +133,13 @@ func mainRefactored() {
 	defer shutdownCancel()
 
 	if err := c.gracefulShutdown(shutdownCtx); err != nil {
-		c.log.Error().Err(errors.SystemError("graceful shutdown", err)).Msg("error during shutdown")
+		c.log.Error().Err(errors.Wrap(err, errors.ErrCodeInternal, "graceful shutdown")).Msg("error during shutdown")
 	}
 
 	c.log.Info().Msg("cuebye!")
 }
 
-// gracefulShutdown handles shutting down all components gracefully
+// gracefulShutdown handles shutting down all components gracefully.
 func (c *CuebertRefactored) gracefulShutdown(ctx context.Context) error {
 	errChan := make(chan error, 3)
 
@@ -178,18 +178,18 @@ func (c *CuebertRefactored) gracefulShutdown(ctx context.Context) error {
 				shutdownErrs = append(shutdownErrs, err)
 			}
 		case <-ctx.Done():
-			return errors.SystemError("shutdown timeout", ctx.Err())
+			return errors.Wrap(ctx.Err(), errors.ErrCodeTimeout, "shutdown timeout")
 		}
 	}
 
 	if len(shutdownErrs) > 0 {
-		return errors.SystemError("shutdown errors", shutdownErrs[0])
+		return errors.Wrap(shutdownErrs[0], errors.ErrCodeInternal, "shutdown errors")
 	}
 
 	return nil
 }
 
-// monitor controls when we start and stop the main routines with improved error handling
+// monitor controls when we start and stop the main routines with improved error handling.
 func (c *CuebertRefactored) monitor() {
 	c.log.Info().Msg("starting routine handler...")
 
@@ -201,7 +201,7 @@ func (c *CuebertRefactored) monitor() {
 				defer func() {
 					if r := recover(); r != nil {
 						c.log.Error().
-							Err(errors.SystemError("reload panic", nil)).
+							Err(errors.New(errors.ErrCodeInternal, "reload panic")).
 							Interface("panic", r).
 							Msg("reload goroutine panicked")
 					}
@@ -220,7 +220,7 @@ func (c *CuebertRefactored) monitor() {
 					defer func() {
 						if r := recover(); r != nil {
 							c.log.Error().
-								Err(errors.SystemError("start routines panic", nil)).
+								Err(errors.New(errors.ErrCodeInternal, "start routines panic")).
 								Interface("panic", r).
 								Msg("start routines goroutine panicked")
 						}
@@ -229,7 +229,7 @@ func (c *CuebertRefactored) monitor() {
 					config.LogFlags(c.log, c.flags)
 					if err := c.run(); err != nil {
 						c.log.Error().
-							Err(errors.SystemError("run routines", err)).
+							Err(errors.Wrap(err, errors.ErrCodeInternal, "run routines")).
 							Msg("error running main routines")
 					}
 				}()
@@ -244,7 +244,7 @@ func (c *CuebertRefactored) monitor() {
 	}
 }
 
-// doEveryWithRecovery runs a function periodically with panic recovery
+// doEveryWithRecovery runs a function periodically with panic recovery.
 func (c *CuebertRefactored) doEveryWithRecovery(d time.Duration, f func(time.Time), skipFirst bool) {
 	ticker := time.NewTicker(d)
 	defer ticker.Stop()
@@ -261,12 +261,12 @@ func (c *CuebertRefactored) doEveryWithRecovery(d time.Duration, f func(time.Tim
 	}
 }
 
-// executeSafely executes a function with panic recovery and error logging
+// executeSafely executes a function with panic recovery and error logging.
 func (c *CuebertRefactored) executeSafely(f func(time.Time)) {
 	defer func() {
 		if r := recover(); r != nil {
 			c.log.Error().
-				Err(errors.SystemError("routine panic", nil)).
+				Err(errors.New(errors.ErrCodeInternal, "routine panic")).
 				Interface("panic", r).
 				Msg("routine panicked during execution")
 		}
@@ -275,7 +275,7 @@ func (c *CuebertRefactored) executeSafely(f func(time.Time)) {
 	f(time.Now())
 }
 
-// setupRefactored initializes the application with better error handling
+// setupRefactored initializes the application with better error handling.
 func setupRefactored() (*CuebertRefactored, error) {
 	// Initialize flags first
 	flags, err := config.LoadFlags()

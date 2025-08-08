@@ -9,7 +9,7 @@ import (
 	"github.com/johnmikee/cuebert/pkg/logger"
 )
 
-// ComplianceTask represents a compliance training or certification task
+// ComplianceTask represents a compliance training or certification task.
 type ComplianceTask struct {
 	BaseTask
 
@@ -23,7 +23,7 @@ type ComplianceTask struct {
 	checkCompliance func(ctx context.Context, userID string) (bool, error)
 }
 
-// NewComplianceTask creates a new compliance task
+// NewComplianceTask creates a new compliance task.
 func NewComplianceTask(
 	id, userID, userEmail, userFullName, taskName string,
 	provider string,
@@ -49,7 +49,7 @@ func NewComplianceTask(
 	}
 }
 
-// Execute runs the compliance check
+// Execute runs the compliance check.
 func (c *ComplianceTask) Execute(ctx context.Context) error {
 	c.log.Info().
 		Str("task_id", c.ID).
@@ -93,7 +93,7 @@ func (c *ComplianceTask) Execute(ctx context.Context) error {
 	return nil
 }
 
-// Validate checks if the compliance task is valid
+// Validate checks if the compliance task is valid.
 func (c *ComplianceTask) Validate(ctx context.Context) error {
 	// Run base validation
 	if err := c.BaseTask.Validate(ctx); err != nil {
@@ -116,22 +116,22 @@ func (c *ComplianceTask) Validate(ctx context.Context) error {
 	return nil
 }
 
-// SetComplianceChecker sets the compliance checking function
+// SetComplianceChecker sets the compliance checking function.
 func (c *ComplianceTask) SetComplianceChecker(checker func(ctx context.Context, userID string) (bool, error)) {
 	c.checkCompliance = checker
 }
 
-// GetDueDate returns the task due date
+// GetDueDate returns the task due date.
 func (c *ComplianceTask) GetDueDate() time.Time {
 	return c.DueDate
 }
 
-// IsOverdue checks if the task is overdue
+// IsOverdue checks if the task is overdue.
 func (c *ComplianceTask) IsOverdue() bool {
 	return !c.IsComplete() && time.Now().After(c.DueDate)
 }
 
-// GetDaysUntilDue returns the number of days until the task is due
+// GetDaysUntilDue returns the number of days until the task is due.
 func (c *ComplianceTask) GetDaysUntilDue() int {
 	if c.IsComplete() {
 		return 0
@@ -147,7 +147,7 @@ func (c *ComplianceTask) GetDaysUntilDue() int {
 	return days
 }
 
-// GetComplianceMetadata returns compliance-specific metadata
+// GetComplianceMetadata returns compliance-specific metadata.
 func (c *ComplianceTask) GetComplianceMetadata() map[string]interface{} {
 	metadata := c.GetMetadata()
 	metadata["training_provider"] = c.TrainingProvider

@@ -1,7 +1,6 @@
 package shared
 
 import (
-	"github.com/johnmikee/cuebert/bot"
 	"github.com/johnmikee/cuebert/bot/ops"
 	"github.com/johnmikee/cuebert/bot/ui"
 	"github.com/johnmikee/cuebert/cuebert/task/implementation"
@@ -10,7 +9,7 @@ import (
 	"github.com/slack-go/slack"
 )
 
-// UserSelectorRefactored demonstrates the refactored version using UI builder
+// UserSelectorRefactored demonstrates the refactored version using UI builder.
 func (c *Shared) UserSelectorRefactored(triggerID, channel string) {
 	// Use the UI builder for clean modal construction
 	modalRequest := ui.New().
@@ -18,7 +17,7 @@ func (c *Shared) UserSelectorRefactored(triggerID, channel string) {
 		SetClose("Close").
 		SetSubmit("Submit").
 		AddHeader("Select User").
-		AddUserSelect("update_user", "User", "users_select", nil, false).
+		AddUserSelect("update_user", "User", "users_select", "", false).
 		BuildModal(
 			c.constFormat(UpdateUserSelector),
 			channel,   // External ID
@@ -34,7 +33,7 @@ func (c *Shared) UserSelectorRefactored(triggerID, channel string) {
 	c.log.Trace().Interface("view_response", vr).Msg("modal opened")
 }
 
-// ComplianceCheckerRefactored demonstrates improved error handling and cleaner code
+// ComplianceCheckerRefactored demonstrates improved error handling and cleaner code.
 func (c *Shared) ComplianceCheckerRefactored(ctx *slacker.InteractionContext) {
 	action := ctx.Callback().ActionCallback.AttachmentActions[0]
 
@@ -79,7 +78,7 @@ func (c *Shared) ComplianceCheckerRefactored(ctx *slacker.InteractionContext) {
 	}
 }
 
-// determineComplianceMessage determines the appropriate message based on compliance status
+// determineComplianceMessage determines the appropriate message based on compliance status.
 func (c *Shared) determineComplianceMessage(compliant bool, err error) string {
 	if err != nil {
 		c.log.Info().Err(err).Bool("compliant", compliant).Msg("compliance check error")
@@ -105,7 +104,7 @@ func (c *Shared) determineComplianceMessage(compliant bool, err error) string {
 	return "⚠️ You have not completed the required training. Please complete the training and try again."
 }
 
-// WantUpdateUserRefactored demonstrates using the UI builder for simple modals
+// WantUpdateUserRefactored demonstrates using the UI builder for simple modals.
 func (c *Shared) WantUpdateUserRefactored(ch string) {
 	// Create a confirmation modal using the UI builder
 	modal := ui.New().
@@ -122,9 +121,11 @@ func (c *Shared) WantUpdateUserRefactored(ch string) {
 		BuildMessage()
 
 	// Send the interactive message
+	// Note: modal.Blocks might be a []slack.MsgOption, not a structure with BlockSet
+	// Send the interactive message using the modal options
 	if _, _, err := c.bot.Bot().SlackClient().PostMessage(
 		ch,
-		slack.MsgOptionBlocks(modal.Blocks.BlockSet...),
+		modal...,
 	); err != nil {
 		c.log.Error().Err(errors.SlackError("send update user prompt", err)).
 			Str("channel", ch).
@@ -132,7 +133,7 @@ func (c *Shared) WantUpdateUserRefactored(ch string) {
 	}
 }
 
-// UpdateUserInfoInteractiveRefactored demonstrates cleaner command registration
+// UpdateUserInfoInteractiveRefactored demonstrates cleaner command registration.
 func (c *Shared) UpdateUserInfoInteractiveRefactored() {
 	definition := &slacker.CommandDefinition{
 		Command:     "update user interactive",
@@ -146,11 +147,12 @@ func (c *Shared) UpdateUserInfoInteractiveRefactored() {
 			defer func() {
 				if r := recover(); r != nil {
 					c.log.Error().
-						Err(errors.SystemError("command panic", nil)).
+						Err(errors.New(errors.ErrCodeInternal, "command panic")).
 						Interface("panic", r).
 						Msg("update user interactive command panicked")
 
-					if err := ctx.Response().Reply("An unexpected error occurred. Please try again."); err != nil {
+					_, err := ctx.Response().Reply("An unexpected error occurred. Please try again.")
+					if err != nil {
 						c.log.Error().Err(errors.SlackError("send panic message", err)).
 							Msg("failed to send error message")
 					}
@@ -164,7 +166,7 @@ func (c *Shared) UpdateUserInfoInteractiveRefactored() {
 	c.bot.Bot().AddCommand(definition)
 }
 
-// CreateUserUpdateModal creates a comprehensive user update modal using the UI builder
+// CreateUserUpdateModal creates a comprehensive user update modal using the UI builder.
 func (c *Shared) CreateUserUpdateModal(user UserInfo) slack.ModalViewRequest {
 	builder := ui.New().
 		SetTitle("Update User Information").
@@ -248,7 +250,7 @@ func (c *Shared) CreateUserUpdateModal(user UserInfo) slack.ModalViewRequest {
 	return builder.BuildModal("user_update_modal", "", user.SlackID)
 }
 
-// UserInfo represents user information for the modal
+// UserInfo represents user information for the modal.
 type UserInfo struct {
 	SlackID      string
 	Email        string

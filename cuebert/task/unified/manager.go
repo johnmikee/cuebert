@@ -12,7 +12,7 @@ import (
 	"github.com/johnmikee/cuebert/pkg/logger"
 )
 
-// Manager handles all task operations using the unified task system
+// Manager handles all task operations using the unified task system.
 type Manager struct {
 	db         *pgxpool.Pool
 	log        logger.Logger
@@ -24,25 +24,25 @@ type Manager struct {
 	executors  map[TaskType]TaskExecutor
 }
 
-// TaskFactory creates tasks of a specific type
+// TaskFactory creates tasks of a specific type.
 type TaskFactory interface {
 	CreateTask(ctx context.Context, params map[string]interface{}) (Task, error)
 }
 
-// TaskExecutor handles task-specific execution logic
+// TaskExecutor handles task-specific execution logic.
 type TaskExecutor interface {
 	Execute(ctx context.Context, task Task) error
 	Validate(ctx context.Context, task Task) error
 }
 
-// Config holds configuration for the task manager
+// Config holds configuration for the task manager.
 type Config struct {
 	DB       *pgxpool.Pool
 	Log      logger.Logger
 	UserRepo repository.UserRepository
 }
 
-// NewManager creates a new unified task manager
+// NewManager creates a new unified task manager.
 func NewManager(config Config) *Manager {
 	return &Manager{
 		db:        config.DB,
@@ -55,7 +55,7 @@ func NewManager(config Config) *Manager {
 	}
 }
 
-// RegisterTaskType registers a new task type with its factory and executor
+// RegisterTaskType registers a new task type with its factory and executor.
 func (m *Manager) RegisterTaskType(taskType TaskType, factory TaskFactory, executor TaskExecutor) {
 	m.factories[taskType] = factory
 	m.executors[taskType] = executor
@@ -65,7 +65,7 @@ func (m *Manager) RegisterTaskType(taskType TaskType, factory TaskFactory, execu
 		Msg("registered task type")
 }
 
-// CreateTask creates a new task of the specified type
+// CreateTask creates a new task of the specified type.
 func (m *Manager) CreateTask(ctx context.Context, taskType TaskType, params map[string]interface{}) (Task, error) {
 	factory, exists := m.factories[taskType]
 	if !exists {
@@ -101,7 +101,7 @@ func (m *Manager) CreateTask(ctx context.Context, taskType TaskType, params map[
 	return task, nil
 }
 
-// GetTask retrieves a task by ID
+// GetTask retrieves a task by ID.
 func (m *Manager) GetTask(ctx context.Context, taskID string) (Task, error) {
 	// Check memory first
 	m.tasksMutex.RLock()
@@ -126,7 +126,7 @@ func (m *Manager) GetTask(ctx context.Context, taskID string) (Task, error) {
 	return task, nil
 }
 
-// GetTasksForUser retrieves all tasks for a specific user
+// GetTasksForUser retrieves all tasks for a specific user.
 func (m *Manager) GetTasksForUser(ctx context.Context, userID string) ([]Task, error) {
 	// Get tracking records from repository
 	trackingRecords, err := m.taskRepo.FindByUserSlackID(ctx, userID)
@@ -151,7 +151,7 @@ func (m *Manager) GetTasksForUser(ctx context.Context, userID string) ([]Task, e
 	return tasks, nil
 }
 
-// GetPendingTasks retrieves all pending tasks
+// GetPendingTasks retrieves all pending tasks.
 func (m *Manager) GetPendingTasks(ctx context.Context) ([]Task, error) {
 	// Get all incomplete tasks
 	trackingRecords, err := m.taskRepo.FindAll(ctx, repository.Conditions{
@@ -180,7 +180,7 @@ func (m *Manager) GetPendingTasks(ctx context.Context) ([]Task, error) {
 	return tasks, nil
 }
 
-// ExecuteTask runs a task
+// ExecuteTask runs a task.
 func (m *Manager) ExecuteTask(ctx context.Context, taskID string) error {
 	task, err := m.GetTask(ctx, taskID)
 	if err != nil {
@@ -202,7 +202,7 @@ func (m *Manager) ExecuteTask(ctx context.Context, taskID string) error {
 	return m.updateTask(ctx, task)
 }
 
-// ProcessReminders checks and sends reminders for tasks that need them
+// ProcessReminders checks and sends reminders for tasks that need them.
 func (m *Manager) ProcessReminders(ctx context.Context) error {
 	tasks, err := m.GetPendingTasks(ctx)
 	if err != nil {
@@ -225,7 +225,7 @@ func (m *Manager) ProcessReminders(ctx context.Context) error {
 	return nil
 }
 
-// ProcessMessages checks and sends first/final messages for tasks
+// ProcessMessages checks and sends first/final messages for tasks.
 func (m *Manager) ProcessMessages(ctx context.Context) error {
 	tasks, err := m.GetPendingTasks(ctx)
 	if err != nil {
@@ -267,7 +267,7 @@ func (m *Manager) ProcessMessages(ctx context.Context) error {
 	return nil
 }
 
-// persistTask saves a task to the database
+// persistTask saves a task to the database.
 func (m *Manager) persistTask(ctx context.Context, task Task) error {
 	// Convert task to tracking record
 	tracking := m.convertTaskToTracking(task)
@@ -276,7 +276,7 @@ func (m *Manager) persistTask(ctx context.Context, task Task) error {
 	return m.taskRepo.Create(ctx, tracking)
 }
 
-// updateTask updates a task in the database
+// updateTask updates a task in the database.
 func (m *Manager) updateTask(ctx context.Context, task Task) error {
 	// Convert task to tracking record
 	tracking := m.convertTaskToTracking(task)
@@ -285,7 +285,7 @@ func (m *Manager) updateTask(ctx context.Context, task Task) error {
 	return m.taskRepo.Update(ctx, task.GetID(), tracking)
 }
 
-// loadTask loads a task from the database
+// loadTask loads a task from the database.
 func (m *Manager) loadTask(ctx context.Context, taskID string) (Task, error) {
 	// This is a simplified version - you'd need to load from the appropriate table
 	// based on task type and reconstruct the proper task object
@@ -297,7 +297,7 @@ func (m *Manager) loadTask(ctx context.Context, taskID string) (Task, error) {
 	return m.convertTrackingToTask(*tracking)
 }
 
-// convertTaskToTracking converts a task to a tracking record
+// convertTaskToTracking converts a task to a tracking record.
 func (m *Manager) convertTaskToTracking(task Task) repository.Tracking {
 	baseTask := task.(*BaseTask) // Assumes all tasks embed BaseTask
 
@@ -318,7 +318,7 @@ func (m *Manager) convertTaskToTracking(task Task) repository.Tracking {
 	}
 }
 
-// convertTrackingToTask converts a tracking record to a task
+// convertTrackingToTask converts a tracking record to a task.
 func (m *Manager) convertTrackingToTask(tracking repository.Tracking) (Task, error) {
 	// This is a simplified version - you'd need to determine the task type
 	// and create the appropriate task object
@@ -348,7 +348,7 @@ func (m *Manager) convertTrackingToTask(tracking repository.Tracking) (Task, err
 	return baseTask, nil
 }
 
-// determineStatus determines task status from tracking record
+// determineStatus determines task status from tracking record.
 func (m *Manager) determineStatus(tracking repository.Tracking) TaskStatus {
 	if tracking.TaskComplete {
 		return TaskStatusCompleted

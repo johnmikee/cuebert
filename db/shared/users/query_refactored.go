@@ -3,8 +3,10 @@ package users
 import (
 	"context"
 
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/johnmikee/cuebert/db/repository"
 	"github.com/johnmikee/cuebert/pkg/errors"
+	"github.com/johnmikee/cuebert/pkg/logger"
 )
 
 // QueryRefactored demonstrates how to use the repository pattern instead of the old query builder.
@@ -14,8 +16,9 @@ type QueryRefactored struct {
 }
 
 // NewQueryRefactored creates a new query instance using the repository pattern.
-func NewQueryRefactored(config *Config) *QueryRefactored {
-	userRepo := repository.NewUserRepository(config.db, config.log)
+// Note: This requires passing the pool directly instead of using the Config's connection.
+func NewQueryRefactored(pool *pgxpool.Pool, log logger.Logger) *QueryRefactored {
+	userRepo := repository.NewUserRepository(pool, log)
 	return &QueryRefactored{
 		userRepo: userRepo,
 	}

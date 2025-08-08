@@ -5,6 +5,8 @@ import (
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
+	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/johnmikee/cuebert/pkg/errors"
 	"github.com/johnmikee/cuebert/pkg/helpers"
 )
@@ -132,4 +134,33 @@ type DatabasePool interface {
 // Result interface for database command results.
 type Result interface {
 	RowsAffected() int64
+}
+
+// PgxPoolAdapter adapts pgxpool.Pool to DatabasePool interface.
+type PgxPoolAdapter struct {
+	pool *pgxpool.Pool
+}
+
+// NewPgxPoolAdapter creates a new adapter for pgxpool.Pool.
+func NewPgxPoolAdapter(pool *pgxpool.Pool) *PgxPoolAdapter {
+	return &PgxPoolAdapter{pool: pool}
+}
+
+// Exec implements DatabasePool interface.
+func (a *PgxPoolAdapter) Exec(ctx context.Context, sql string, arguments ...interface{}) (Result, error) {
+	tag, err := a.pool.Exec(ctx, sql, arguments...)
+	if err != nil {
+		return nil, err
+	}
+	return &pgxResult{tag: tag}, nil
+}
+
+// pgxResult adapts pgconn.CommandTag to Result interface.
+type pgxResult struct {
+	tag pgconn.CommandTag
+}
+
+// RowsAffected implements Result interface.
+func (r *pgxResult) RowsAffected() int64 {
+	return r.tag.RowsAffected()
 }

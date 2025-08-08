@@ -65,7 +65,7 @@ func (q *Query) Query() (DI, error) {
 	return devices, nil
 }
 
-// All returns all users and values in the table
+// All returns all users and values in the table.
 func (q *Query) All() *Query {
 	q.sql = q.config.st.Select(columns...).From(q.config.table)
 

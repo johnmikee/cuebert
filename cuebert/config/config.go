@@ -1,6 +1,6 @@
 package config
 
-// Config holds the sensitive values for the program
+// Config holds the sensitive values for the program.
 type Config struct {
 	AdminGroupID           string `json:"admin_group_id"`
 	DBAddress              string `json:"db_address"`

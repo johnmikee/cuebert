@@ -10,7 +10,7 @@ var fieldsByTag = make(map[reflect.Type]map[string]map[string]string)
 
 const keyType = "json"
 
-// GetStructKeys will return the json tags from a struct
+// GetStructKeys will return the json tags from a struct.
 func GetStructKeys(t interface{}) []string {
 	val := reflect.ValueOf(t)
 	typ := val.Type()

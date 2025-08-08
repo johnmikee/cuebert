@@ -9,7 +9,7 @@ import (
 	"github.com/slack-go/slack"
 )
 
-// loadPrompt leads us to the modal to update cuebert
+// loadPrompt leads us to the modal to update cuebert.
 func (c *Shared) LoadPrompt(user, title, callback string) {
 	c.bot.ModalGateway(
 		&bot.ModalGateway{
@@ -52,7 +52,7 @@ func (c *Shared) Launch(ctx *slacker.InteractionContext) {
 	_, _, _ = c.bot.Bot().SlackClient().DeleteMessage(ctx.Callback().Channel.ID, ctx.Callback().MessageTs)
 }
 
-// OverrideSubmit acknowledges the stop request and stops cuebert
+// OverrideSubmit acknowledges the stop request and stops cuebert.
 func (c *Shared) OverrideSubmit(ctx *slacker.InteractionContext) {
 	_, _, _ = c.bot.Bot().SlackClient().DeleteMessage(ctx.Callback().Channel.ID, ctx.Callback().MessageTs)
 
@@ -71,7 +71,7 @@ func (c *Shared) OverrideSubmit(ctx *slacker.InteractionContext) {
 	c.log.Info().Msg("cuebert stop approved")
 }
 
-// note who submitted the stop request and present an approval message
+// note who submitted the stop request and present an approval message.
 func (c *Shared) StopApprover(ctx *slacker.InteractionContext) {
 	_, _, _ = c.bot.Bot().SlackClient().DeleteMessage(ctx.Callback().Channel.ID, ctx.Callback().MessageTs)
 

@@ -89,7 +89,7 @@ func (c *Common) scheduleReminder(t time.Duration, bi *tracking.Info) {
 		Msg("notification reminder sent")
 }
 
-// SendReminder sends a reminder to the user based on their input
+// SendReminder sends a reminder to the user based on their input.
 func (c *Common) SendReminder(count int, b *tracking.Info) {
 	dev, err := c.tables.Device().By().Opts(devices.SerialNumber, b.SerialNumber).Query()
 	if err != nil {

@@ -7,7 +7,7 @@ import (
 	"github.com/lithammer/fuzzysearch/fuzzy"
 )
 
-// FuzzyMatchOpt takes a string and a list of options and returns the closest match
+// FuzzyMatchOpt takes a string and a list of options and returns the closest match.
 func FuzzyMatchNonOpt(opt string, opts []string) string {
 	maybeMatch := fuzzy.RankFind(opt, opts)
 	var msg string

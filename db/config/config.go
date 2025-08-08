@@ -37,7 +37,7 @@ type DB struct {
 	Pool *pgxpool.Pool
 }
 
-// Acquire will return a connection from the pool
+// Acquire will return a connection from the pool.
 func (d *DB) Acquire(ctx context.Context) (*pgxpool.Conn, error) {
 	if d.Pool != nil {
 		return d.Pool.Acquire(ctx)
@@ -46,7 +46,7 @@ func (d *DB) Acquire(ctx context.Context) (*pgxpool.Conn, error) {
 	return nil, errors.New("pool is nil")
 }
 
-// Implementation is a convenience type for the supported DB types
+// Implementation is a convenience type for the supported DB types.
 type Implementation string
 
 const (
@@ -55,7 +55,7 @@ const (
 	SQLite   Implementation = "sqlite"
 )
 
-// Validate will check the required arguments to establish a connection
+// Validate will check the required arguments to establish a connection.
 func (c *Config) Validate() (bool, error) {
 	if c.Connection.User == "" {
 		return false, errors.New("must include user value")
@@ -80,10 +80,10 @@ func (c *Config) Validate() (bool, error) {
 	return true, nil
 }
 
-// UpdateOptions is a function type to update the Config struct
+// UpdateOptions is a function type to update the Config struct.
 type UpdateOptions func(*Config) *Config
 
-// Update will update the Config struct with the provided options
+// Update will update the Config struct with the provided options.
 func (c *Config) Update(opts ...UpdateOptions) *Config {
 	for _, opt := range opts {
 		c = opt(c)
@@ -91,7 +91,7 @@ func (c *Config) Update(opts ...UpdateOptions) *Config {
 	return c
 }
 
-// WithTable is an option to update the Config struct with a table name
+// WithTable is an option to update the Config struct with a table name.
 func WithTable(table string) UpdateOptions {
 	return func(c *Config) *Config {
 		c.Table = table

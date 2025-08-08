@@ -25,7 +25,7 @@ const (
 	UpdateUserSubmit     = "update_user_submit"
 )
 
-// exclusions commands
+// exclusions commands.
 const (
 	ExclusionAddQuestion  = "exclusion_add_question"
 	ExclusionAddYes       = "exclusion_add_yes"
@@ -41,7 +41,7 @@ const (
 	YesAddExclusion       = "yes_add_exclusion"
 )
 
-// modal and attachment fields
+// modal and attachment fields.
 const (
 	Accept          = "accept"
 	AckIT           = "ack_it"

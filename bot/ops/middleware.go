@@ -6,7 +6,7 @@ import (
 	"github.com/shomali11/slacker/v2"
 )
 
-// Middlewares is a type for the different middlewares that can be registered
+// Middlewares is a type for the different middlewares that can be registered.
 type Middlewares string
 
 const (
@@ -14,14 +14,14 @@ const (
 	LoggingInteraction Middlewares = "LoggingInteractionMiddleware"
 )
 
-// Middleware is a struct that holds the bot, users, and logger
+// Middleware is a struct that holds the bot, users, and logger.
 type Middleware struct {
 	Bot   *slacker.Slacker
 	Users []string
 	Log   logger.Logger
 }
 
-// AuthorizationMiddleware checks if a user is authorized to use a given command
+// AuthorizationMiddleware checks if a user is authorized to use a given command.
 func AuthorizationMiddleware(authorizedUserNames []string) slacker.CommandMiddlewareHandler {
 	return func(next slacker.CommandHandler) slacker.CommandHandler {
 		return func(ctx *slacker.CommandContext) {
@@ -32,7 +32,7 @@ func AuthorizationMiddleware(authorizedUserNames []string) slacker.CommandMiddle
 	}
 }
 
-// LoggingInteractionMiddleware logs all interactions
+// LoggingInteractionMiddleware logs all interactions.
 func LoggingInteractionMiddleware(log logger.Logger) slacker.InteractionMiddlewareHandler {
 	return func(next slacker.InteractionHandler) slacker.InteractionHandler {
 		return func(ctx *slacker.InteractionContext) {
@@ -47,7 +47,7 @@ func LoggingInteractionMiddleware(log logger.Logger) slacker.InteractionMiddlewa
 	}
 }
 
-// RegisterMiddleWares registers the middlewares
+// RegisterMiddleWares registers the middlewares.
 func RegisterMiddleWares(m *Middleware, opts ...Middlewares) {
 	for _, o := range opts {
 		switch o {

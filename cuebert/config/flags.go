@@ -2,7 +2,7 @@ package config
 
 import "github.com/johnmikee/cuebert/pkg/logger"
 
-// Flags holds the args for the program
+// Flags holds the args for the program.
 type Flags struct {
 	AuthorizedUsers         string   // Comma-separated list of users to perform authorized actions.
 	AuthUsers               []string // Composed version of AuthorizedUsers.

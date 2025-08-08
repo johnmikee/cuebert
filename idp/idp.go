@@ -6,14 +6,14 @@ import (
 	"github.com/johnmikee/cuebert/pkg/logger"
 )
 
-// IDP represents the IDP type
+// IDP represents the IDP type.
 type IDP string
 
 const (
 	Okta IDP = "okta"
 )
 
-// Provider represents the IDP provider
+// Provider represents the IDP provider.
 type Provider interface {
 	Setup(config Config)
 	GetAdminGroup(string) ([]string, error)
@@ -23,7 +23,7 @@ type Provider interface {
 	RemoveFromBlocked(string) error
 }
 
-// Config is used to configure the IDP provider
+// Config is used to configure the IDP provider.
 type Config struct {
 	IDPBlockGroup string        `json:"block_group,omitempty"`
 	Domain        string        `json:"domain,omitempty"`

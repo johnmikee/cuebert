@@ -49,7 +49,7 @@ type MajorBreakdown struct {
 	OS        []OS
 }
 
-// ByMajorVers will group the OS by major version
+// ByMajorVers will group the OS by major version.
 func (o OSCount) ByMajorVers() []MajorBreakdown {
 	major := make(map[string][]OS)
 	for _, os := range o {
@@ -79,7 +79,7 @@ func (o OSCount) ByMajorVers() []MajorBreakdown {
 	return majorBreakdown
 }
 
-// AddUpdates adds the OS count to the updates table
+// AddUpdates adds the OS count to the updates table.
 func (o OSCount) AddUpdates(tables *tables.Config) error {
 	_, week := time.Now().ISOWeek()
 	day := int(time.Now().Weekday())

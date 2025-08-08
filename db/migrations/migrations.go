@@ -11,7 +11,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-// Make migrations referencing a local file system
+// Make migrations referencing a local file system.
 func Make(connStr string, migrationFiles string) error {
 	m, err := migrate.New(
 		"file://"+migrationFiles,
@@ -27,7 +27,7 @@ func Make(connStr string, migrationFiles string) error {
 //go:embed sql/*.sql
 var fs embed.FS
 
-// MakeEmbed uses the embedded file system to make migrations of the neighboring sql directory
+// MakeEmbed uses the embedded file system to make migrations of the neighboring sql directory.
 func MakeEmbed(connStr string) error {
 	entries, err := fs.ReadDir("sql")
 	if err != nil {
@@ -48,7 +48,7 @@ func MakeEmbed(connStr string) error {
 	return up(m)
 }
 
-// up is a kids movie that gives you the sad feels
+// up is a kids movie that gives you the sad feels.
 func up(m *migrate.Migrate) error {
 	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
 		return errors.Wrap(err, "failed to migrate")

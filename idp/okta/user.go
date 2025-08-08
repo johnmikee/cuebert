@@ -8,10 +8,10 @@ import (
 	"github.com/johnmikee/cuebert/idp"
 )
 
-// UserResponse is a slice of User responses returned when querying the /users endpoint
+// UserResponse is a slice of User responses returned when querying the /users endpoint.
 type UserResponse []User
 
-// User holds information on the user returned when querying the /users endpoint
+// User holds information on the user returned when querying the /users endpoint.
 type User struct {
 	ID              string    `json:"id"`
 	Status          string    `json:"status"`
@@ -24,7 +24,7 @@ type User struct {
 	Profile         Profile   `json:"profile"`
 }
 
-// Profiles holds information on the users profile
+// Profiles holds information on the users profile.
 type Profile struct {
 	LastName    string `json:"lastName"`
 	Manager     string `json:"manager"`
@@ -39,7 +39,7 @@ type Profile struct {
 	Email       string `json:"email"`
 }
 
-// UserOpts holds the three options for user name when querying the /users endpoint
+// UserOpts holds the three options for user name when querying the /users endpoint.
 type UserOpts struct {
 	ID             string
 	Login          string

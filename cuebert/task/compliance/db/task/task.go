@@ -77,7 +77,7 @@ func (t TI) Completed() TI {
 	return completed
 }
 
-// Config stores the database connection
+// Config stores the database connection.
 type Config struct {
 	db    *pgxpool.Conn
 	ctx   context.Context

@@ -17,7 +17,7 @@ type PieChartOption struct {
 //
 // {b}: the name of a data item.
 // {c}: the value of a data item.
-// {d}: the percent of a data item(pie chart)
+// {d}: the percent of a data item(pie chart).
 func pieSeriesShowCount() charts.OptionFunc {
 	return func(opt *charts.ChartOption) {
 		for index := range opt.SeriesList {

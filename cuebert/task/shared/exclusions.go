@@ -16,7 +16,7 @@ type ExclusionRequest struct {
 }
 
 // exclusionRequest is the modal the user will see when they request an exclusion
-// the results of this modal will be sent to exclusionRequestDecision
+// the results of this modal will be sent to exclusionRequestDecision.
 func (c *Shared) ExclusionRequest(e *ExclusionRequest) {
 	headerSection := headerBlock("Request an Exclusion")
 
@@ -44,7 +44,7 @@ func (c *Shared) ExclusionRequest(e *ExclusionRequest) {
 	}
 }
 
-// ExclusionRequested handles the request for an exclusion allowing authorized users to approve or deny
+// ExclusionRequested handles the request for an exclusion allowing authorized users to approve or deny.
 func (c *Shared) ExclusionRequested(ctx *slacker.InteractionContext) {
 	action := ctx.Callback().ActionCallback.AttachmentActions[0]
 

@@ -6,22 +6,22 @@ import (
 	"github.com/pkg/errors"
 )
 
-// BasicComputerInfo holds basic information associated with Jamf device
+// BasicComputerInfo holds basic information associated with Jamf device.
 type BasicComputerInfo struct {
 	GeneralInformation
 }
 
-// Computer holds information associated with a Jamf device
+// Computer holds information associated with a Jamf device.
 type Computer struct {
 	Info ComputerDetails `json:"computer" xml:"computer,omitempty"`
 }
 
-// ComputerDetails holds information associated with a Jamf device
+// ComputerDetails holds information associated with a Jamf device.
 type ComputerDetails struct {
 	ID int `json:"id,omitempty" xml:"id,omitempty"`
 }
 
-// GeneralInformation holds basic information associated with Jamf device
+// GeneralInformation holds basic information associated with Jamf device.
 type GeneralInformation struct {
 	ID                  int    `json:"id,omitempty" xml:"id,omitempty"`
 	Name                string `json:"name" xml:"name,omitempty"`

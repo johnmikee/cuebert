@@ -9,7 +9,7 @@ import (
 	"github.com/johnmikee/cuebert/db/shared/overdue"
 )
 
-// CheckCompliance looks at all users and removes them if they are compliant
+// CheckCompliance looks at all users and removes them if they are compliant.
 func (c *Shared) CheckCompliance(time.Time) {
 	users, err := c.impl.CheckComplianceAll()
 	if err != nil {

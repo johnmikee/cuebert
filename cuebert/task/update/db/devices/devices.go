@@ -10,7 +10,7 @@ import (
 	"github.com/johnmikee/cuebert/pkg/logger"
 )
 
-// Info represents the columns in the devices table
+// Info represents the columns in the devices table.
 type Info struct {
 	DeviceID     string     `json:"device_id"`
 	DeviceName   string     `json:"device_name"`
@@ -66,7 +66,7 @@ const (
 	UpdatedAt    Column = "updated_at"
 )
 
-// Device returns a new client used to interact with the devices table
+// Device returns a new client used to interact with the devices table.
 func Device(c *config.Config) *Config {
 	conn, err := c.DB.Pool.Acquire(context.Background())
 	if err != nil {

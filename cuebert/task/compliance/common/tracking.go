@@ -8,7 +8,7 @@ import (
 	"github.com/slack-go/slack"
 )
 
-// Tracking returns the tracking information for the given user as an attachment
+// Tracking returns the tracking information for the given user as an attachment.
 func (c *Common) Tracking(title string, user tracking.TI) *slack.Attachment {
 	var attch slack.Attachment
 	for _, u := range user {

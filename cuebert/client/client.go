@@ -14,7 +14,7 @@ import (
 	"github.com/slack-go/slack"
 )
 
-// Client holds the config for different parts of the program
+// Client holds the config for different parts of the program.
 type Client struct {
 	Bot           *bot.Bot
 	Config        *config.Config

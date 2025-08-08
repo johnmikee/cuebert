@@ -9,7 +9,7 @@ import (
 	"github.com/slack-go/slack"
 )
 
-// SendReminder sends a reminder to the user based on their input
+// SendReminder sends a reminder to the user based on their input.
 func (c *Common) SendReminder(count int, t *tracking.Info) {
 	c.shared.SendMSG(
 		&shared.ReminderPayload{

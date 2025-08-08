@@ -39,7 +39,7 @@ func (c *Cuebert) run() {
 	c.lifecyle.Stop()
 }
 
-// doEvery runs a function every on a duration until stop signal is received
+// doEvery runs a function every on a duration until stop signal is received.
 func (c *Cuebert) doEvery(d time.Duration, f func(time.Time), continuous bool) {
 	ticker := time.NewTicker(d)
 	defer ticker.Stop()

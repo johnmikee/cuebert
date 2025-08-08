@@ -18,7 +18,7 @@ type Config struct {
 	Log     *logger.Logger
 }
 
-// Client represents the Kandji API client
+// Client represents the Kandji API client.
 type Client struct {
 	token   string
 	baseURL string

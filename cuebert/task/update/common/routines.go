@@ -187,14 +187,16 @@ func (c *Common) Diff(time.Time) {
 		return
 	}
 
-	// Using context.Background() for simplicity, consider using a more specific context if applicable
-	cmdTag, err := c.tables.Pool().Exec(context.Background(), "DELETE FROM updates_os_tracking WHERE serial_number IN ($1)", pq.Array(remove))
+	// Use safe query builder to prevent SQL injection
+	safeQueries := NewSafeQueries()
+	tableName := c.tables.Tracking().Table()
+	rowsAffected, err := safeQueries.DeleteTrackingRecords(context.Background(), c.tables.Pool(), tableName, remove)
 	if err != nil {
 		c.log.Debug().AnErr("removing devices from tracking table", err).Send()
 		return
 	}
 
-	c.log.Debug().Int("rowsAffected", int(cmdTag.RowsAffected())).Msg("Removed devices from tracking table")
+	c.log.Debug().Int64("rowsAffected", rowsAffected).Msg("Removed devices from tracking table")
 
 	go c.status.UpdateStatus(
 		&handlers.RoutineUpdate{

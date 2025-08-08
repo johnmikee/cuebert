@@ -10,7 +10,7 @@ import (
 	"github.com/johnmikee/cuebert/pkg/logger"
 )
 
-// Info represents the columns in the users table
+// Info represents the columns in the users table.
 type Info struct {
 	UserServiceID int       `json:"user_service_id"`
 	UserLongName  string    `json:"user_long_name"`
@@ -30,7 +30,7 @@ func (u UI) GetServiceID() int {
 	return u[0].UserServiceID
 }
 
-// Config is used to interact with the users table
+// Config is used to interact with the users table.
 type Config struct {
 	db    *pgxpool.Conn
 	ctx   context.Context
@@ -63,7 +63,7 @@ const (
 	UpdatedAt    Column = "updated_at"
 )
 
-// User returns a new client used to interact with the users table
+// User returns a new client used to interact with the users table.
 func User(c *config.Config) *Config {
 	c.Log.Info().Msg("connecting to db...")
 	conn, err := c.DB.Pool.Acquire(context.Background())

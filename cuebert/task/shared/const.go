@@ -48,7 +48,7 @@ const (
 	YesAddExclusion       = "yes_add_exclusion"
 )
 
-// modal and attachment fields
+// modal and attachment fields.
 const (
 	Accept             = "accept"
 	AckIT              = "ack_it"

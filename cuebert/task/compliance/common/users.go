@@ -23,7 +23,7 @@ var (
 	no         = slack.NewTextBlockObject(slack.PlainTextType, "No", false, false)
 )
 
-// UserCompliant implements shared.Caller checking if a user is compliant
+// UserCompliant implements shared.Caller checking if a user is compliant.
 func (c *Common) UserCompliant(slackID string) error {
 	ui, err := c.tables.User().By().Opts(users.UserSlackID, slackID).Query()
 	if err != nil {
@@ -39,7 +39,7 @@ func (c *Common) UserCompliant(slackID string) error {
 	return c.idp.RemoveFromBlocked(ui[0].UserEmail)
 }
 
-// AddAllUsers will take the users from the compliance task implementation and add them to the DB
+// AddAllUsers will take the users from the compliance task implementation and add them to the DB.
 func (c *Common) AddAllUsers(cu []info.Users) ([]string, error) {
 	ui := []users.Info{}
 
@@ -94,7 +94,7 @@ func (c *Common) AddAllUsers(cu []info.Users) ([]string, error) {
 	return nil, err
 }
 
-// UserUpdate is the handler for the user update command
+// UserUpdate is the handler for the user update command.
 func (c *Common) UserUpdate(ctx *slacker.InteractionContext) {
 	values := ctx.Callback().View.State.Values
 	userID := values[shared.UpdateUser][shared.UsersSelect].SelectedUser
@@ -182,7 +182,7 @@ func (c *Common) UserUpdate(ctx *slacker.InteractionContext) {
 	}
 }
 
-// UserUpdateSubmit is the handler for the user update modal submission
+// UserUpdateSubmit is the handler for the user update modal submission.
 func (c *Common) UserUpdateSubmit(ctx *slacker.InteractionContext) {
 	values := ctx.Callback().View.State.Values
 
@@ -225,7 +225,7 @@ func (c *Common) UserUpdateSubmit(ctx *slacker.InteractionContext) {
 	}
 }
 
-// UserUpdateModalSubmit extracts the values from the modal and formats as needed
+// UserUpdateModalSubmit extracts the values from the modal and formats as needed.
 func (c *Common) UserUpdateModalSubmit(base *tracking.Info, values map[string]map[string]slack.BlockAction) {
 	if values[shared.Email][shared.Email].Value != "" {
 		base.UserEmail = values[shared.Email][shared.Email].Value
@@ -242,7 +242,7 @@ func (c *Common) UserUpdateModalSubmit(base *tracking.Info, values map[string]ma
 	}
 }
 
-// GetUsersInfo is the admin command the query a user and return their information in slack
+// GetUsersInfo is the admin command the query a user and return their information in slack.
 func (c *Common) GetUsersInfo() {
 	reportOpts := []string{"slackid", "email"}
 	definition := &slacker.CommandDefinition{

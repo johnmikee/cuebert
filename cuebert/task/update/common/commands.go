@@ -9,7 +9,7 @@ import (
 	"github.com/slack-go/slack"
 )
 
-// RegisterHelp
+// RegisterHelp.
 func (c *Common) RegisterHelp() {
 	definition := &slacker.CommandDefinition{
 		Command:     "help",

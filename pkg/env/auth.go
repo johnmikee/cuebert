@@ -21,13 +21,13 @@ value: the value of the secret you are storing/getting
 
 var interactive bool = true
 
-// Secret is a struct that holds the name and value of a secret
+// Secret is a struct that holds the name and value of a secret.
 type Secret struct {
 	Name  string
 	Value string
 }
 
-// Secrets is a slice of Secret used for convenience functions
+// Secrets is a slice of Secret used for convenience functions.
 type Secrets []Secret
 
 const svc = "cuebert"
@@ -92,7 +92,7 @@ func getKey(service, key string) (string, bool) {
 	return secret, true
 }
 
-// Optionally make it a map
+// Optionally make it a map.
 func (s *Secrets) ToMap(skipFields ...string) map[string]string {
 	result := make(map[string]string)
 

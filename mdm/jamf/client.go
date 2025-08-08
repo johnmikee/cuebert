@@ -9,7 +9,7 @@ import (
 	"github.com/johnmikee/cuebert/pkg/requester"
 )
 
-// Client represents the configuration for the Jamf API client
+// Client represents the configuration for the Jamf API client.
 type Config struct {
 	Domain   string
 	Username string
@@ -19,7 +19,7 @@ type Config struct {
 	client   *http.Client
 }
 
-// Client represents the Jamf API client
+// Client represents the Jamf API client.
 type Client struct {
 	domain   string
 	username string
@@ -39,7 +39,7 @@ func (c *Client) Setup(m mdm.Config) {
 	c.client = m.Client
 }
 
-// New returns a client to communicate with the Jamf API
+// New returns a client to communicate with the Jamf API.
 func New(c *Config) *Client {
 	return &Client{
 		domain:   c.Domain,

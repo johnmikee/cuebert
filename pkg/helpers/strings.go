@@ -20,7 +20,7 @@ func Contains(s []string, e string) bool {
 	return false
 }
 
-// ContainsPosition is the same as Contains but returns the position of the string in the slice
+// ContainsPosition is the same as Contains but returns the position of the string in the slice.
 func ContainsPosition(s []string, e string) (int, bool) {
 	for i, a := range s {
 		if strings.Contains(a, e) {
@@ -30,12 +30,12 @@ func ContainsPosition(s []string, e string) (int, bool) {
 	return 0, false
 }
 
-// Remove will remove an item from a string slice and return the string slice
+// Remove will remove an item from a string slice and return the string slice.
 func Remove(slice []string, s int) []string {
 	return append(slice[:s], slice[s+1:]...)
 }
 
-// InvalidSemVerError is returned when a semantic version is invalid
+// InvalidSemVerError is returned when a semantic version is invalid.
 type InvalidSemVerError struct {
 	message string
 }
@@ -98,7 +98,7 @@ func RemoveEmpty(s []string) []string {
 	return r
 }
 
-// RespToJson converts a response struct to json
+// RespToJson converts a response struct to json.
 func RespToJson(v any) string {
 	b, err := json.Marshal(v)
 	if err != nil {

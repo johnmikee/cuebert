@@ -75,7 +75,7 @@ func (c *Shared) BaseMessage(rp *ReminderPayload, splay int64) (bool, error) {
 	return true, nil
 }
 
-// finalMessage delivers the final message
+// finalMessage delivers the final message.
 func (c *Shared) finalMessage(m *ReminderPayload, splay int64) error {
 	c.log.Debug().
 		Int64("splay", splay).
@@ -117,7 +117,7 @@ func (c *Shared) finalMessage(m *ReminderPayload, splay int64) error {
 	return nil
 }
 
-// MessageTesting acknowledges the request and loads a modal
+// MessageTesting acknowledges the request and loads a modal.
 func (c *Shared) MessageTesting(ctx *slacker.InteractionContext) {
 	_, _, _ = c.bot.Bot().SlackClient().DeleteMessage(ctx.Callback().Channel.ID, ctx.Callback().MessageTs)
 

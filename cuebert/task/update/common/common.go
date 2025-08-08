@@ -23,7 +23,7 @@ import (
 	"github.com/slack-go/slack"
 )
 
-// Common holds the common values for the program
+// Common holds the common values for the program.
 type Common struct {
 	bot    *bot.Bot
 	config *config.Config
@@ -36,41 +36,31 @@ type Common struct {
 	shared *shared.Shared
 }
 
-// FirstMessageDelivered sets the first message delivered flag for the given slack id
+// FirstMessageDelivered sets the first message delivered flag for the given slack id.
 func (c *Common) FirstMessageDelivered(serviceID, slackID string) error {
-	// _, err := c.tables.Tracking().Update().WithOptions(
-	// 	tracking.Info{
-	// 		UserServiceID:      serviceID,
-	// 		UserSlackID:        slackID,
-	// 		FirstMessageSent:   true,
-	// 		FirstMessageSentAt: helpers.UpdateTime(),
-	// 	}).Parse(tracking.UserSlackID, slackID).Send()
+	// Use safe query builder to prevent SQL injection
+	safeQueries := NewSafeQueries()
 	tableName := c.tables.Tracking().Table()
-	query := fmt.Sprintf("UPDATE %s SET first_message_sent = true, first_message_sent_at = $1 WHERE user_slack_id = $2;", tableName)
-	// query := "UPDATE $1 SET first_message_sent = true, first_message_sent_at = $2 WHERE user_slack_id = $3;"
-
-	_, err := c.tables.Pool().Exec(context.Background(), query, helpers.UpdateTime(), slackID)
-
-	return err
+	return safeQueries.UpdateFirstMessageDelivered(context.Background(), c.tables.Pool(), tableName, slackID)
 }
 
 // FirstMessageSent implements shared.Caller.
 func (c *Common) FirstMessageSent(serviceID string, slackID string) error {
+	// Use safe query builder to prevent SQL injection
+	safeQueries := NewSafeQueries()
 	tableName := c.tables.Tracking().Table()
-	query := fmt.Sprintf("UPDATE %s SET first_message_sent = true, first_message_sent_at = $1 WHERE user_slack_id = $2;", tableName)
-	_, err := c.tables.Pool().Exec(context.Background(), query, helpers.UpdateTime(), slackID)
-	return err
+	return safeQueries.UpdateFirstMessageSent(context.Background(), c.tables.Pool(), tableName, slackID)
 }
 
 // FinalMessageSent implements shared.Caller.
 func (c *Common) FinalMessageSent(serviceID string, slackID string) error {
+	// Use safe query builder to prevent SQL injection
+	safeQueries := NewSafeQueries()
 	tableName := c.tables.Tracking().Table()
-	query := fmt.Sprintf("UPDATE %s SET final_message_sent = true, final_message_sent_at = $1 WHERE user_slack_id = $2;", tableName)
-	_, err := c.tables.Pool().Exec(context.Background(), query, helpers.UpdateTime(), slackID)
-	return err
+	return safeQueries.UpdateFinalMessageSent(context.Background(), c.tables.Pool(), tableName, slackID)
 }
 
-// ReminderMessage delivers the reminder message
+// ReminderMessage delivers the reminder message.
 func (c *Common) ReminderMessage(rp *shared.ReminderPayload) error {
 	return c.shared.DeliverReminder(
 		&shared.Reminder{
@@ -104,7 +94,7 @@ type Config struct {
 	Shared *shared.Shared
 }
 
-// New will return a new User struct
+// New will return a new User struct.
 func New(u *Config) *Common {
 	c := &Common{
 		bot:    u.Bot,
@@ -158,7 +148,7 @@ type Overlap struct {
 	FullName string
 }
 
-// AddAllDevices will add all devices from the MDM to the DB
+// AddAllDevices will add all devices from the MDM to the DB.
 func (c *Common) AddAllDevices(dev []mdm.Device) error {
 	dev, err := c.listDevices(dev)
 	if err != nil {
@@ -193,7 +183,7 @@ func (c *Common) AddAllDevices(dev []mdm.Device) error {
 	return nil
 }
 
-// AddAllUsers will add all users from the MDM to the DB
+// AddAllUsers will add all users from the MDM to the DB.
 func (c *Common) AddAllUsers(dev []mdm.Device) ([]string, error) {
 	res, err := c.listDevices(dev)
 	if err != nil {

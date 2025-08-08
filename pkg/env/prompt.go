@@ -13,15 +13,15 @@ inspired by https://petersouter.xyz/testing-and-mocking-stdin-in-golang/
 mocking user input was a bit tricky, but this article saved me oodles of time.
 */
 
-// PasswordReader returns password read from a reader
+// PasswordReader returns password read from a reader.
 type PasswordReader interface {
 	ReadPassword() (string, error)
 }
 
-// StdInPasswordReader default stdin password reader
+// StdInPasswordReader default stdin password reader.
 type StdInPasswordReader struct{}
 
-// ReadPassword reads password from stdin
+// ReadPassword reads password from stdin.
 func (pr StdInPasswordReader) ReadPassword() (string, error) {
 	pwd, error := term.ReadPassword(int(syscall.Stdin))
 	return string(pwd), error

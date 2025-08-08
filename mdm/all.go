@@ -2,7 +2,7 @@ package mdm
 
 import "time"
 
-// Device holds the general purpose information of the device
+// Device holds the general purpose information of the device.
 type Device struct {
 	DeviceID        string      `json:"device_id"`
 	DeviceName      string      `json:"device_name"`
@@ -17,23 +17,23 @@ type Device struct {
 	LastEnrollment  string      `json:"last_enrollment"`
 }
 
-// DeviceResults is a slice of Device used for convenience functions
+// DeviceResults is a slice of Device used for convenience functions.
 type DeviceResults []Device
 
-// DeviceDetails is the struct that contains the device information for Devices and Users
+// DeviceDetails is the struct that contains the device information for Devices and Users.
 type DeviceDetails struct {
 	General Device `json:"general"`
 	Users   User   `json:"users"`
 }
 
-// User is the struct that contains the user information pulled from the implementation
+// User is the struct that contains the user information pulled from the implementation.
 type User struct {
 	Email string `json:"email"`
 	Name  string `json:"name"`
 	ID    string `json:"id"`
 }
 
-// QueryOpts is a list of options to query devices
+// QueryOpts is a list of options to query devices.
 type QueryOpts struct {
 	AssetTag     string `json:"asset_tag"`
 	DeviceID     string `json:"device_id"`

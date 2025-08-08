@@ -87,7 +87,7 @@ func DUOverlapQuery() (string, []interface{}, error) {
 		ToSql()
 }
 
-// DeviceUserOverlap returns a list of devices that have a user name and a slack id
+// DeviceUserOverlap returns a list of devices that have a user name and a slack id.
 func (c *Common) deviceUserOverlap() ([]Overlap, error) {
 	query, args, err := DUOverlapQuery()
 	if err != nil {

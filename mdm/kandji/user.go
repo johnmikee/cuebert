@@ -79,13 +79,13 @@ import (
 	"github.com/johnmikee/cuebert/mdm"
 )
 
-// Users holds information about the console and system users on the machine
+// Users holds information about the console and system users on the machine.
 type Users struct {
 	RegularUsers []User `json:"regular_users"`
 	SystemUsers  []User `json:"system_users"`
 }
 
-// User represents a user object for the machine user
+// User represents a user object for the machine user.
 type User struct {
 	Username string  `json:"username"`
 	Uid      string  `json:"uid"`

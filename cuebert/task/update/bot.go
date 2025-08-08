@@ -8,12 +8,12 @@ import (
 	"github.com/slack-go/slack"
 )
 
-// ExclusionRequestDecision executes the exclusion request decision helper
+// ExclusionRequestDecision executes the exclusion request decision helper.
 func (c *Client) ExclusionRequestDecision(ctx *slacker.InteractionContext) {
 	c.common.ExclusionRequestDecision(ctx)
 }
 
-// ExclusionYes runs when an exclusion is approved
+// ExclusionYes runs when an exclusion is approved.
 func (c *Client) ExclusionYes(ctx *slacker.InteractionContext) {
 	c.common.ExclusionYes(ctx)
 }
@@ -23,7 +23,7 @@ func (c *Client) ExclusionAddBlocks() []*slack.InputBlock {
 	return c.common.ExclusionAddBlocks()
 }
 
-// ExclusionSubmit submits the exclusion request
+// ExclusionSubmit submits the exclusion request.
 func (c *Client) ExclusionSubmit(ctx *slacker.InteractionContext) {
 	c.common.ExclusionSubmit(ctx)
 }
@@ -33,7 +33,7 @@ func (c *Client) GetUserTZ(slackID string) (int64, error) {
 	return c.common.GetUserTZ(slackID)
 }
 
-// UserExclusionSubmit submits the user exclusion request
+// UserExclusionSubmit submits the user exclusion request.
 func (c *Client) UserExclusionSubmit(ctx *slacker.InteractionContext) {
 	c.common.UserExclusionSubmit(ctx)
 }
@@ -43,12 +43,12 @@ func (c *Client) UpdateReminderTime(dateVal string, timeVal string, slackID stri
 	return c.common.UpdateReminderTime(dateVal, timeVal, slackID)
 }
 
-// UserUpdate runs the user update modal
+// UserUpdate runs the user update modal.
 func (c *Client) UserUpdate(ctx *slacker.InteractionContext) {
 	c.common.UserUpdate(ctx)
 }
 
-// UserUpdateSubmit submits the user update request
+// UserUpdateSubmit submits the user update request.
 func (c *Client) UserUpdateSubmit(ctx *slacker.InteractionContext) {
 	c.common.UserUpdateSubmit(ctx)
 }

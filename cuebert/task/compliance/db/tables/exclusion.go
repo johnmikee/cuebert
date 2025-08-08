@@ -8,7 +8,7 @@ import (
 	"github.com/johnmikee/cuebert/db/shared/exclusions"
 )
 
-// Request allows a user to request an Exclusion
+// Request allows a user to request an Exclusion.
 func (c *Config) Request(slackID, reason string, until time.Time) error {
 	user, err := c.Tracking().By().Opts(tracking.UserSlackID, slackID).Query()
 	if err != nil {

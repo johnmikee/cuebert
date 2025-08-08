@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-// StatusMessage is used by the program to send status messages to the health check endpoint
+// StatusMessage is used by the program to send status messages to the health check endpoint.
 type StatusMessage struct {
 	Message     string         `json:"message"`
 	Code        int            `json:"code"`
@@ -21,7 +21,7 @@ type StatusMessage struct {
 	DailyReport *BotStatus     `json:"daily_repost"`
 }
 
-// BotStatus is used to send the status of various parts of the bot
+// BotStatus is used to send the status of various parts of the bot.
 type BotStatus struct {
 	Name    string `json:"name"`
 	Message string `json:"message"`
@@ -29,12 +29,12 @@ type BotStatus struct {
 	Time    string `json:"time"`
 }
 
-// DBStatus is used to send the status of the database connection
+// DBStatus is used to send the status of the database connection.
 type DBStatus struct {
 	Connected bool `json:"connected"`
 }
 
-// RoutineStatus is used to send the status of the main program routines
+// RoutineStatus is used to send the status of the main program routines.
 type RoutineStatus struct {
 	Name          string `json:"name"`
 	Start         string `json:"start_time"`
@@ -51,13 +51,13 @@ type RoutineUpdate struct {
 	StatusChan chan StatusMessage
 }
 
-// StatusHandler is used to manage the status of the program
+// StatusHandler is used to manage the status of the program.
 type StatusHandler struct {
 	status     StatusMessage
 	statusLock sync.RWMutex
 }
 
-// SetStatus is used to set the status of the program retrieved by the health check endpoint
+// SetStatus is used to set the status of the program retrieved by the health check endpoint.
 func (sh *StatusHandler) SetStatus(status StatusMessage) {
 	sh.statusLock.Lock()
 	defer sh.statusLock.Unlock()
@@ -72,7 +72,7 @@ func (sh *StatusHandler) GetStatus() StatusMessage {
 	return sh.status
 }
 
-// StartHealthHandler is used to start the health check endpoint
+// StartHealthHandler is used to start the health check endpoint.
 func (sh *StatusHandler) StartHealthHandler() {
 	server := &http.Server{
 		Addr:              ":8888",

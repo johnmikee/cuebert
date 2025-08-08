@@ -32,7 +32,7 @@ type ReminderPayload struct {
 	Title         string
 }
 
-// DeliverReminder delivers the reminder to the user
+// DeliverReminder delivers the reminder to the user.
 func (c *Shared) DeliverReminder(r *Reminder) error {
 	attachment := slack.Attachment{
 		Title:      r.Title,
@@ -110,7 +110,7 @@ func (c *Shared) ReminderPicker(triggerID, title string) {
 	}
 }
 
-// ReminderRequested is the callback for the reminder button
+// ReminderRequested is the callback for the reminder button.
 func (c *Shared) ReminderRequested(ctx *slacker.InteractionContext) {
 	action := ctx.Callback().ActionCallback.AttachmentActions[0]
 
@@ -131,7 +131,7 @@ func (c *Shared) ReminderRequested(ctx *slacker.InteractionContext) {
 	}
 }
 
-// ReminderSubmit is the callback for the reminder picker
+// ReminderSubmit is the callback for the reminder picker.
 func (c *Shared) ReminderSubmit(ctx *slacker.InteractionContext) {
 	values := ctx.Callback().View.State.Values
 

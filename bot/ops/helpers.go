@@ -12,7 +12,7 @@ Given that each item is optional we need to create a function for each type (boo
  that takes the selected option as a parameter and if that is empty return the default value
 */
 
-// OptionalBool takes a slack.OptionBlockObject and a current bool and returns the selected value or the current value
+// OptionalBool takes a slack.OptionBlockObject and a current bool and returns the selected value or the current value.
 func OptionalBool(opt slack.OptionBlockObject, current bool) bool {
 	if opt.Value == "" {
 		return current
@@ -20,7 +20,7 @@ func OptionalBool(opt slack.OptionBlockObject, current bool) bool {
 	return helpers.YNToBool(opt.Text.Text)
 }
 
-// OptionalInt takes a string and a current int and returns the selected value or the current value
+// OptionalInt takes a string and a current int and returns the selected value or the current value.
 func OptionalInt(opt string, current int) int {
 	if opt == "" {
 		return current
@@ -28,7 +28,7 @@ func OptionalInt(opt string, current int) int {
 	return helpers.ValToInt(strings.TrimSuffix(opt, "m"))
 }
 
-// OptionalStr takes a string and a current string and returns the selected value or the current value
+// OptionalStr takes a string and a current string and returns the selected value or the current value.
 func OptionalStr(opt, current string) string {
 	if opt == "" {
 		return current
@@ -36,7 +36,7 @@ func OptionalStr(opt, current string) string {
 	return opt
 }
 
-// OptionalStrSelect takes a slack.OptionBlockObject and a current string and returns the selected value or the current value
+// OptionalStrSelect takes a slack.OptionBlockObject and a current string and returns the selected value or the current value.
 func OptionalStrSelect(opt slack.OptionBlockObject, current string) string {
 	if opt.Value == "" {
 		return current

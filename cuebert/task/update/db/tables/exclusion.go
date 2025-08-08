@@ -9,7 +9,7 @@ import (
 	"github.com/johnmikee/cuebert/db/shared/exclusions"
 )
 
-// AddExclusion adds an Exclusion to the database
+// AddExclusion adds an Exclusion to the database.
 func (c *Config) Add(serial, reason string, until time.Time) error {
 	di, err := c.Device().By().Opts(devices.SerialNumber, serial).Query()
 	if err != nil {
@@ -66,7 +66,7 @@ func (c *Config) Serials(slackID string) []string {
 	return serials
 }
 
-// RequestExclusion allows a user to request an Exclusion
+// RequestExclusion allows a user to request an Exclusion.
 func (c *Config) Request(slackID, reason string, serials []string, until time.Time) error {
 	user, err := c.Tracking().By().Opts(tracking.UserSlackID, slackID).Query()
 	if err != nil {

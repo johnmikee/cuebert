@@ -8,10 +8,10 @@ import (
 	"github.com/johnmikee/cuebert/pkg/requester"
 )
 
-// DeviceResults is a list of DeviceResult
+// DeviceResults is a list of DeviceResult.
 type DeviceResults []DeviceResult
 
-// GetDeviceDetails returns details on the device
+// GetDeviceDetails returns details on the device.
 func (c *Client) GetDeviceDetails(d string) (*mdm.Device, error) {
 	details, err := c.deviceDetails(d)
 	if err != nil {
@@ -119,7 +119,7 @@ func (c *Client) listDevices(limit, offset int) (mdm.DeviceResults, error) {
 	return results, nil
 }
 
-// ListAllDevices will paginate through devices until there is no response and return the results
+// ListAllDevices will paginate through devices until there is no response and return the results.
 func (c *Client) ListAllDevices() (mdm.DeviceResults, error) {
 	opts := &offsetRange{
 		Limit:  300,

@@ -95,7 +95,7 @@ type Tables struct {
 	Log    logger.Logger
 }
 
-// New returns a new db connection
+// New returns a new db connection.
 func New(s *Tables) *Config {
 	return &Config{
 		user:       u,

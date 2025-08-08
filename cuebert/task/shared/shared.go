@@ -64,7 +64,7 @@ type ImplChecker interface {
 	CheckComplianceAll() ([]info.PersistUsers, error)
 }
 
-// New will return a new User struct
+// New will return a new User struct.
 func New(u *Config) *Shared {
 	return &Shared{
 		config:    u.Config,

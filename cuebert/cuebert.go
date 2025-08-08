@@ -20,7 +20,7 @@ import (
 	"go.uber.org/automaxprocs/maxprocs"
 )
 
-// Cuebert is a struct to hold config for the program
+// Cuebert is a struct to hold config for the program.
 type Cuebert struct {
 	bot           *bot.Bot
 	db            db.Client
@@ -84,7 +84,7 @@ func main() {
 	c.log.Info().Msg("cuebye!")
 }
 
-// control when we start and stop the main routines for the program
+// control when we start and stop the main routines for the program.
 func (c *Cuebert) monitor() {
 	c.log.Info().Msg("starting routine handler...")
 	// wait for start, stop, or reload signals from the lifecycle system

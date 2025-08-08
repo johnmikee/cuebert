@@ -21,7 +21,7 @@ func (c *Client) ReminderMessage(r *shared.ReminderPayload) error {
 	return c.common.ReminderMessage(r)
 }
 
-// MessageAcknowledged runs when the message has been acknowledged
+// MessageAcknowledged runs when the message has been acknowledged.
 func (c *Client) MessageAcknowledged(userID string, when time.Time, which string) error {
 	return c.common.MessageAcknowledged(userID, when, which)
 }

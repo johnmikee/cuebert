@@ -29,7 +29,7 @@ func (c *Common) IsExcluded(email string) (bool, bool) {
 	return false, false
 }
 
-// ExclusionYes is the helper function to request an exclusion
+// ExclusionYes is the helper function to request an exclusion.
 func (c *Common) ExclusionYes(ctx *slacker.InteractionContext) {
 	c.shared.ExclusionRequest(
 		&shared.ExclusionRequest{
@@ -41,7 +41,7 @@ func (c *Common) ExclusionYes(ctx *slacker.InteractionContext) {
 	)
 }
 
-// ExclusionRequestDecision handles the decision to approve or deny an exclusion
+// ExclusionRequestDecision handles the decision to approve or deny an exclusion.
 func (c *Common) ExclusionRequestDecision(ctx *slacker.InteractionContext) {
 	action := ctx.Callback().ActionCallback.AttachmentActions[0].Value
 

@@ -10,7 +10,7 @@ import (
 	"github.com/johnmikee/cuebert/pkg/logger"
 )
 
-// Info represents a row in the admin table
+// Info represents a row in the admin table.
 type Info struct {
 	Week           int       `json:"week"`
 	ActiveCampaign bool      `json:"active_campaign"`
@@ -18,10 +18,10 @@ type Info struct {
 	UpdatedAt      time.Time `json:"updated_at"`
 }
 
-// UI is a convenience type for a slice of Info
+// UI is a convenience type for a slice of Info.
 type UI []Info
 
-// Empty checks if the Info slice is empty
+// Empty checks if the Info slice is empty.
 func (u UI) Empty() bool {
 	return len(u) == 0
 }
@@ -41,7 +41,7 @@ var columns = []string{
 	"updated_at",
 }
 
-// Column is a convenience type for the column names
+// Column is a convenience type for the column names.
 type Column string
 
 const (
@@ -52,7 +52,7 @@ const (
 	UpdatedAt      Column = "updated_at"
 )
 
-// Admin returns a new client used to interact with the admin table
+// Admin returns a new client used to interact with the admin table.
 func Admin(c *config.Config) *Config {
 	conn, err := c.DB.Pool.Acquire(context.Background())
 	if err != nil {

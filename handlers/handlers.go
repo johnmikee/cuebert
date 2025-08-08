@@ -11,13 +11,13 @@ import (
 	"github.com/johnmikee/cuebert/pkg/logger"
 )
 
-// Reporting is an interface for the reporting information
+// Reporting is an interface for the reporting information.
 type Reporting interface {
 	MakePie() []PieInfo
 	MakeLines() *LineInfo
 }
 
-// Handler represents the http handlers
+// Handler represents the http handlers.
 type Handler struct {
 	Status    *StatusHandler
 	Reporting bool
@@ -25,7 +25,7 @@ type Handler struct {
 	Log       logger.Logger
 }
 
-// Server represents the client handling the http requests
+// Server represents the client handling the http requests.
 type Server struct {
 	log    logger.Logger
 	port   string
@@ -34,7 +34,7 @@ type Server struct {
 	graphs Reporting
 }
 
-// StartHandlers starts the http handlers
+// StartHandlers starts the http handlers.
 func StartHandlers(h *Handler) {
 	m := chi.NewRouter()
 

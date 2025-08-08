@@ -15,7 +15,7 @@ import (
 
 const testSvc = "cue"
 
-// teardown deletes the keys from the keyring
+// teardown deletes the keys from the keyring.
 func teardown(keys []string) {
 	for _, key := range keys {
 		err := keyring.Delete(key, svc)
@@ -25,7 +25,7 @@ func teardown(keys []string) {
 	}
 }
 
-// TestSetSimpleKeys tests setting simple keys in the keyring
+// TestSetSimpleKeys tests setting simple keys in the keyring.
 func TestSetSimpleKeys(t *testing.T) {
 	testKeys := []string{"test1", "test2", "test3"}
 	for _, key := range testKeys {
@@ -37,7 +37,7 @@ func TestSetSimpleKeys(t *testing.T) {
 	teardown(testKeys)
 }
 
-// TestGetSetSimpleKeys tests setting and getting simple keys in the keyring
+// TestGetSetSimpleKeys tests setting and getting simple keys in the keyring.
 func TestGetSetSimpleKeys(t *testing.T) {
 	testInput := make(map[string]string)
 	testInput["key1"] = "value1"
@@ -71,7 +71,7 @@ Introduction
 Go is a new language. Although it borrows ideas from existing languages, it has unusual properties that make effective Go programs different in character from programs written in its relatives. A straightforward translation of a C++ or Java program into Go is unlikely to produce a satisfactory result—Java programs are written in Java, not Go. On the other hand, thinking about the problem from a Go perspective could produce a successful but quite different program. In other words, to write Go well, it's important to understand its properties and idioms. It's also important to know the established conventions for programming in Go, such as naming, formatting, program construction, and so on, so that programs you write will be easy for other Go programmers to understand.
 `
 
-// generateRandomString generates a random string of the specified length
+// generateRandomString generates a random string of the specified length.
 func generateRandomString(length int) (string, error) {
 	buffer := make([]byte, length/2) // Since hex encoding requires 2 characters per byte
 
@@ -84,7 +84,7 @@ func generateRandomString(length int) (string, error) {
 	return randomString, nil
 }
 
-// generateRandomStringArray generates an array of random strings
+// generateRandomStringArray generates an array of random strings.
 func generateRandomStringArray(arrayLength, stringLength int) ([]string, error) {
 	randomStrings := make([]string, arrayLength)
 
@@ -100,7 +100,7 @@ func generateRandomStringArray(arrayLength, stringLength int) ([]string, error) 
 	return randomStrings, nil
 }
 
-// TestGetSetLongKeys tests setting and getting long keys in the keyring
+// TestGetSetLongKeys tests setting and getting long keys in the keyring.
 func TestGetSetLongKeys(t *testing.T) {
 	arrayLength := 10  // Length of the string array
 	stringLength := 16 // Length of each random string (in bytes)
@@ -137,7 +137,7 @@ func TestGetSetLongKeys(t *testing.T) {
 	teardown([]string{"key1", "key2", "key3", "key4", "key5"})
 }
 
-// TestCheckKeyNotFound tests the scenario when a key is not found in the keyring
+// TestCheckKeyNotFound tests the scenario when a key is not found in the keyring.
 func TestCheckKeyNotFound(t *testing.T) {
 	arrayLength := 4   // Length of the string array
 	stringLength := 12 // Length of each random string (in bytes)
@@ -158,7 +158,7 @@ func TestCheckKeyNotFound(t *testing.T) {
 	}
 }
 
-// TestCheckKeyFound tests the scenario when a key is found in the keyring
+// TestCheckKeyFound tests the scenario when a key is found in the keyring.
 func TestCheckKeyFound(t *testing.T) {
 	service := "testService"
 	key := "testKey"
@@ -182,7 +182,7 @@ func TestCheckKeyFound(t *testing.T) {
 	teardown([]string{key})
 }
 
-// TestGetKeyNotFound tests the scenario when a key is not found in the keyring
+// TestGetKeyNotFound tests the scenario when a key is not found in the keyring.
 func TestGetKeyNotFound(t *testing.T) {
 	arrayLength := 4   // Length of the string array
 	stringLength := 12 // Length of each random string (in bytes)
@@ -203,7 +203,7 @@ func TestGetKeyNotFound(t *testing.T) {
 	}
 }
 
-// TestGetKeyFound tests the scenario when a key is found in the keyring
+// TestGetKeyFound tests the scenario when a key is found in the keyring.
 func TestGetKeyFound(t *testing.T) {
 	service := "testService"
 	key := "testKey"
@@ -227,7 +227,7 @@ func TestGetKeyFound(t *testing.T) {
 	teardown([]string{key})
 }
 
-// TestToMap tests the ToMap method of the Secrets type
+// TestToMap tests the ToMap method of the Secrets type.
 func TestToMap(t *testing.T) {
 	secrets := Secrets{
 		{Name: "key1", Value: "value1"},
@@ -248,7 +248,7 @@ func TestToMap(t *testing.T) {
 	}
 }
 
-// TestCheckKey tests the checkKey function
+// TestCheckKey tests the checkKey function.
 func TestCheckKey(t *testing.T) {
 	// Test when secret is found
 	err := keyring.Set(testSvc, "key1", "test")
@@ -274,7 +274,7 @@ func TestCheckKey(t *testing.T) {
 	}
 }
 
-// TestGetConfig tests the GetConfig function
+// TestGetConfig tests the GetConfig function.
 func TestGetConfig(t *testing.T) {
 	err := keyring.Set(testSvc, "key1", "test")
 	if err != nil {

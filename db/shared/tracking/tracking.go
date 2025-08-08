@@ -102,7 +102,7 @@ func (i Info) UserInt() int {
 	return uid
 }
 
-// EmailSlackIDMap returns a map of user emails to slack ids
+// EmailSlackIDMap returns a map of user emails to slack ids.
 func (u TI) EmailSlackIDMap() map[string]string {
 	m := make(map[string]string)
 	for _, v := range u {
@@ -119,7 +119,7 @@ type Config struct {
 	table string
 }
 
-// Tracking returns a new tracking config
+// Tracking returns a new tracking config.
 func Tracking(c *config.Config) *Config {
 	conn, err := c.DB.Pool.Acquire(context.Background())
 	if err != nil {

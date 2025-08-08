@@ -12,7 +12,7 @@ import (
 	"google.golang.org/api/sheets/v4"
 )
 
-// Config holds the configuration needed to set up the GoogleClient
+// Config holds the configuration needed to set up the GoogleClient.
 type Config struct {
 	GoogleServiceCreds string
 	Scopes             []string
@@ -23,7 +23,7 @@ type Config struct {
 }
 
 // Client holds the config for setting up our client
-// to interact with the Google Sheets API
+// to interact with the Google Sheets API.
 type Client struct {
 	ctx     context.Context
 	ts      oauth2.TokenSource
@@ -64,7 +64,7 @@ func (c *Client) newSheets() {
 }
 
 // credsToContent takes the base64 encoded string of the google service file
-// and returns a string version of the contents
+// and returns a string version of the contents.
 func credsToContent(c string) ([]byte, error) {
 	content, err := base64.StdEncoding.DecodeString(c)
 	if err != nil {

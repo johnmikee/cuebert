@@ -11,7 +11,7 @@ import (
 	"github.com/johnmikee/cuebert/pkg/logger"
 )
 
-// Info represents the columns in the exclusions table
+// Info represents the columns in the exclusions table.
 type Info struct {
 	Approved     bool      `json:"approved"`
 	SerialNumber string    `json:"serial_number"`
@@ -63,7 +63,7 @@ const (
 	Until        Column = "until"
 )
 
-// Exclusion returns a new client used to interact with the exclusions table
+// Exclusion returns a new client used to interact with the exclusions table.
 func Exclusion(c *config.Config) *Config {
 	conn, err := c.DB.Pool.Acquire(context.Background())
 	if err != nil {

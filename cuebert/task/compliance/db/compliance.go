@@ -11,14 +11,14 @@ import (
 // Table represents the database table.
 type Table string
 
-// Available options for the Table type
+// Available options for the Table type.
 const (
 	Users             Table = "users_compliance"
 	TaskStatusInfo    Table = "compliance_task"
 	UserRelationships Table = "user_relationships"
 )
 
-// Connection stores the database connection
+// Connection stores the database connection.
 type Connection struct {
 	Pool    *pgxpool.Pool
 	DB      *pgxpool.Conn

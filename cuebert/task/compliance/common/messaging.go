@@ -9,7 +9,7 @@ import (
 	"github.com/slack-go/slack"
 )
 
-// FirstMessageSent sets the first message sent flag for the given slack id
+// FirstMessageSent sets the first message sent flag for the given slack id.
 func (c *Common) FirstMessageSent(serviceID, slackID string) error {
 	_, err := c.tables.Tracking().Update().WithOptions(
 		tracking.Info{
@@ -21,7 +21,7 @@ func (c *Common) FirstMessageSent(serviceID, slackID string) error {
 	return err
 }
 
-// FirstMessageDelivered sets the first message delivered flag for the given slack id
+// FirstMessageDelivered sets the first message delivered flag for the given slack id.
 func (c *Common) FirstMessageDelivered(serviceID, slackID string) error {
 	_, err := c.tables.Tracking().Update().WithOptions(
 		tracking.Info{
@@ -34,7 +34,7 @@ func (c *Common) FirstMessageDelivered(serviceID, slackID string) error {
 	return err
 }
 
-// FinalMessageSent sets the final message sent flag for the given slack id
+// FinalMessageSent sets the final message sent flag for the given slack id.
 func (c *Common) FinalMessageSent(serviceID, slackID string) error {
 	_, err := c.tables.Tracking().Update().WithOptions(
 		tracking.Info{
@@ -47,7 +47,7 @@ func (c *Common) FinalMessageSent(serviceID, slackID string) error {
 	return err
 }
 
-// ReminderMessage delivers the reminder message
+// ReminderMessage delivers the reminder message.
 func (c *Common) ReminderMessage(rp *shared.ReminderPayload) error {
 	return c.shared.DeliverReminder(
 		&shared.Reminder{
@@ -71,7 +71,7 @@ func (c *Common) ReminderMessage(rp *shared.ReminderPayload) error {
 	)
 }
 
-// FinalMessage delivers the final message
+// FinalMessage delivers the final message.
 func (c *Common) FinalMessage(m *shared.ReminderPayload, splay int64) error {
 	c.log.Debug().
 		Int64("splay", splay).

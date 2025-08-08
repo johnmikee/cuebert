@@ -54,7 +54,7 @@ func (c *Shared) AddExclusion() {
 	c.bot.Bot().AddCommand(definition)
 }
 
-// ExclusionHelp invokes the exclusion modal users can use to request an exclusion
+// ExclusionHelp invokes the exclusion modal users can use to request an exclusion.
 func (c *Shared) ExclusionHelp() {
 	definition := &slacker.CommandDefinition{
 		Command:     "request exclusion",
@@ -97,7 +97,7 @@ func (c *Shared) InitSettings() {
 	c.bot.Bot().AddCommand(definition)
 }
 
-// MessageTest allows us to stop cuebert from running via slack. requires secondary approval
+// MessageTest allows us to stop cuebert from running via slack. requires secondary approval.
 func (c *Shared) MessageTest() {
 	definition := &slacker.CommandDefinition{
 		Command:     "test messaging",
@@ -111,7 +111,7 @@ func (c *Shared) MessageTest() {
 	c.bot.Bot().AddCommand(definition)
 }
 
-// Stopper allows us to stop cuebert from running via slack. requires secondary approval
+// Stopper allows us to stop cuebert from running via slack. requires secondary approval.
 func (c *Shared) Stopper() {
 	definition := &slacker.CommandDefinition{
 		Command:     "stop cuebert",
@@ -139,7 +139,7 @@ func (c *Shared) UpdateConfig() {
 	c.bot.Bot().AddCommand(definition)
 }
 
-// getStatus returns the status of the bot
+// getStatus returns the status of the bot.
 func (c *Shared) GetStatus(status *handlers.StatusHandler) {
 	definition := &slacker.CommandDefinition{
 		Command:     "get status",
@@ -162,7 +162,7 @@ func (c *Shared) GetStatus(status *handlers.StatusHandler) {
 	c.bot.Bot().AddCommand(definition)
 }
 
-// reminderHelp adds the reminder command to the bot
+// reminderHelp adds the reminder command to the bot.
 func (c *Shared) ReminderHelp() {
 	var title string
 	switch c.flags.TaskImplementation {

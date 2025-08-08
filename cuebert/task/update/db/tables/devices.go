@@ -5,7 +5,7 @@ import (
 	"github.com/johnmikee/cuebert/db/shared/users"
 )
 
-// DevicesByUser returns all devices for a user from the devices table
+// DevicesByUser returns all devices for a user from the devices table.
 func (c *Config) ByUser(user string) (devices.DI, error) {
 	userInfo, err := c.User().By().Opts(users.UserTaskID, user).Query()
 	if err != nil {

@@ -18,12 +18,12 @@ const (
 	WARN  = "warn"
 )
 
-// Logger is our custom logger struct wrapping zerolog
+// Logger is our custom logger struct wrapping zerolog.
 type Logger struct {
 	zerolog.Logger
 }
 
-// Env represents the environment the service is running in
+// Env represents the environment the service is running in.
 type Env string
 
 const (
@@ -31,7 +31,7 @@ const (
 	Dev  Env = "dev"
 )
 
-// Config is a struct that holds the configuration for the logger
+// Config is a struct that holds the configuration for the logger.
 type Config struct {
 	ToFile  bool
 	Level   string
@@ -43,12 +43,12 @@ type Config struct {
 var log zerolog.Logger
 
 // NewLogger returns a new Logger struct with the log to file
-// and log level arguments
+// and log level arguments.
 func New(l *Config) Logger {
 	return Logger{initLogger(l)}
 }
 
-// Default returns a logger set to debug
+// Default returns a logger set to debug.
 func Default() Logger {
 	return Logger{
 		initLogger(&Config{
@@ -83,7 +83,7 @@ func leveler(l string) zerolog.Level {
 	}
 }
 
-// Setup initializes the logger with the provided configuration
+// Setup initializes the logger with the provided configuration.
 func Setup(l *Config) {
 	log = initLogger(l)
 }
@@ -131,7 +131,7 @@ func initLogger(l *Config) zerolog.Logger {
 }
 
 // ChildLogger returns the default logger with a child service appended
-// for additional context
+// for additional context.
 func ChildLogger(service string, z *Logger) Logger {
 	return Logger{z.With().Str("child", service).Logger()}
 }

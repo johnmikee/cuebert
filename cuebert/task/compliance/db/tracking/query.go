@@ -92,7 +92,7 @@ func (q *Query) WhereAnd(w []WA) *Query {
 	return q
 }
 
-// All returns all the information from the tracking table
+// All returns all the information from the tracking table.
 func (q *Query) All() *Query {
 	q.sql = q.config.st.Select(columns...).From(q.config.table)
 

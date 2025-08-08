@@ -1,6 +1,6 @@
 package implementation
 
-// Implementation is the interface that wraps the basic methods for a task implementation
+// Implementation is the interface that wraps the basic methods for a task implementation.
 type Item string
 
 const (

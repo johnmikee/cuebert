@@ -64,7 +64,7 @@ func (b *Bot) sendAttachment(attachment slack.Attachment, channel, msg string) {
 		Msg("message sent")
 }
 
-// CreateOptionBlockObjects - utility function for generating option block objects
+// CreateOptionBlockObjects - utility function for generating option block objects.
 func CreateOptionBlockObjects(options []string) []*slack.OptionBlockObject {
 	optionBlockObjects := make([]*slack.OptionBlockObject, 0, len(options))
 

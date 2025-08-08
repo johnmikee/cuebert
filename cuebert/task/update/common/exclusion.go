@@ -47,7 +47,7 @@ func (c *Common) ExclusionYes(ctx *slacker.InteractionContext) {
 	// )
 }
 
-// exclusionRequestDecision handles the decision to approve or deny an exclusion
+// exclusionRequestDecision handles the decision to approve or deny an exclusion.
 func (c *Common) ExclusionRequestDecision(ctx *slacker.InteractionContext) {
 	action := ctx.Callback().ActionCallback.AttachmentActions[0].Value
 

@@ -16,7 +16,7 @@ const ( // Available options for the Table type
 	Devices    Table = "devices"
 )
 
-// Connection stores the database connection
+// Connection stores the database connection.
 type Connection struct {
 	Pool    *pgxpool.Pool
 	DB      *pgxpool.Conn

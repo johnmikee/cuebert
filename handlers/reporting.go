@@ -7,20 +7,20 @@ import (
 	"github.com/go-echarts/go-echarts/v2/opts"
 )
 
-// PieInfo represents the data needed to generate a pie chart
+// PieInfo represents the data needed to generate a pie chart.
 type PieInfo struct {
 	Title    string
 	Subtitle string
 	Items    []Items
 }
 
-// Items represents the items contained in a pie chart
+// Items represents the items contained in a pie chart.
 type Items struct {
 	Name  string
 	Value interface{}
 }
 
-// LineInfo represents the data needed to generate a line chart
+// LineInfo represents the data needed to generate a line chart.
 type LineInfo struct {
 	Title    string
 	Subtitle string
@@ -28,7 +28,7 @@ type LineInfo struct {
 	XAxis    []string
 }
 
-// Series contains the data used to generate a line chart
+// Series contains the data used to generate a line chart.
 type Series struct {
 	Name    string
 	Data    []opts.LineData
@@ -43,7 +43,7 @@ func generatePieItems(n *PieInfo) []opts.PieData {
 	return items
 }
 
-// Lines represents the line chart
+// Lines represents the line chart.
 type Lines struct {
 	c *charts.Line
 }

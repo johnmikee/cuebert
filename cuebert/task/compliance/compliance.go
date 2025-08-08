@@ -188,37 +188,37 @@ func (c *Client) ExclusionAddBlocks() []*slack.InputBlock {
 	return c.common.ExclusionAddBlocks()
 }
 
-// ExclusionRequestDecision executes the exclusion request decision helper
+// ExclusionRequestDecision executes the exclusion request decision helper.
 func (c *Client) ExclusionRequestDecision(ctx *slacker.InteractionContext) {
 	c.common.ExclusionRequestDecision(ctx)
 }
 
-// ExclusionSubmit submits the exclusion request
+// ExclusionSubmit submits the exclusion request.
 func (c *Client) ExclusionSubmit(ctx *slacker.InteractionContext) {
 	c.common.ExclusionSubmit(ctx)
 }
 
-// ExclusionYes runs when an exclusion is approved
+// ExclusionYes runs when an exclusion is approved.
 func (c *Client) ExclusionYes(ctx *slacker.InteractionContext) {
 	c.common.ExclusionYes(ctx)
 }
 
-// MessageAcknowledged runs when the message has been acknowledged
+// MessageAcknowledged runs when the message has been acknowledged.
 func (c *Client) MessageAcknowledged(userID string, when time.Time, which string) error {
 	return c.common.MessageAcknowledged(userID, when, which)
 }
 
-// UserExclusionSubmit submits the user exclusion request
+// UserExclusionSubmit submits the user exclusion request.
 func (c *Client) UserExclusionSubmit(ctx *slacker.InteractionContext) {
 	c.common.UserExclusionSubmit(ctx)
 }
 
-// UserUpdate runs the user update modal
+// UserUpdate runs the user update modal.
 func (c *Client) UserUpdate(ctx *slacker.InteractionContext) {
 	c.common.UserUpdate(ctx)
 }
 
-// UserUpdateSubmit submits the user update request
+// UserUpdateSubmit submits the user update request.
 func (c *Client) UserUpdateSubmit(ctx *slacker.InteractionContext) {
 	c.common.UserUpdateSubmit(ctx)
 }

@@ -7,7 +7,7 @@ import (
 	"github.com/slack-go/slack/socketmode"
 )
 
-// Handlers is a type for the different handlers that can be registered
+// Handlers is a type for the different handlers that can be registered.
 type Handlers string
 
 const (
@@ -15,7 +15,7 @@ const (
 	OnDisconnected     Handlers = "OnDisconnect"
 )
 
-// Handle is a struct that holds the bot, handlers, logger, and alert channel
+// Handle is a struct that holds the bot, handlers, logger, and alert channel.
 type Handle struct {
 	Bot          *slacker.Slacker
 	Handlers     []Handlers
@@ -23,12 +23,12 @@ type Handle struct {
 	AlertChannel string
 }
 
-// DefaultHandlers registers the default handlers
+// DefaultHandlers registers the default handlers.
 func DefaultHandlers(c *Handle) {
 	c.UnsupportedCommandHandler()
 }
 
-// RegisterHandlers registers the handlers
+// RegisterHandlers registers the handlers.
 func RegisterHandlers(c *Handle) {
 	for _, h := range c.Handlers {
 		switch h {
@@ -40,7 +40,7 @@ func RegisterHandlers(c *Handle) {
 	}
 }
 
-// DisconnectedHandler registers the disconnected handler that runs when the bot disconnects from Slack
+// DisconnectedHandler registers the disconnected handler that runs when the bot disconnects from Slack.
 func (h *Handle) DisconnectedHandler() {
 	h.Bot.OnDisconnected(func(event socketmode.Event) {
 		h.Log.Info().Interface("event", event).Msg("disconnected")
@@ -53,7 +53,7 @@ func (h *Handle) DisconnectedHandler() {
 	})
 }
 
-// UnsupportedCommandHandler registers the unsupported command handler that runs when the bot receives an unsupported command
+// UnsupportedCommandHandler registers the unsupported command handler that runs when the bot receives an unsupported command.
 func (h *Handle) UnsupportedCommandHandler() {
 	h.Bot.UnsupportedCommandHandler(func(ctx *slacker.CommandContext) {
 		if ctx.Event().UserProfile != nil {

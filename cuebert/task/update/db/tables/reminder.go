@@ -7,12 +7,12 @@ import (
 	"github.com/johnmikee/cuebert/cuebert/task/update/db/tracking"
 )
 
-// PullReminderInfo returns all the rows in the bot_results table
+// PullReminderInfo returns all the rows in the bot_results table.
 func (b *Config) PullReminderInfo() (tracking.TI, error) {
 	return b.Tracking().By().All().Query()
 }
 
-// ReminderSent sets the reminder sent flag to true
+// ReminderSent sets the reminder sent flag to true.
 func (b *Config) ReminderSent(sent bool, serial string) error {
 	_, err := b.Tracking().Update().
 		WithOptions(tracking.Info{ReminderSent: sent, SerialNumber: serial}).
@@ -21,7 +21,7 @@ func (b *Config) ReminderSent(sent bool, serial string) error {
 	return err
 }
 
-// ReminderSentCheck returns true if the reminder has been sent
+// ReminderSentCheck returns true if the reminder has been sent.
 func (b *Config) ReminderSentCheck(s string) (bool, error) {
 	res, err := b.Tracking().By().Opts(tracking.UserSlackID, s).Query()
 	if err != nil {
@@ -35,7 +35,7 @@ func (b *Config) ReminderSentCheck(s string) (bool, error) {
 	return res[0].ReminderSent, nil
 }
 
-// SetDate sets the reminder date for the given slack id
+// SetDate sets the reminder date for the given slack id.
 func (b *Config) SetDate(id, date string) error {
 	_, err := b.Tracking().Update().
 		WithOptions(tracking.Info{UserReminderDate: date}).
@@ -44,7 +44,7 @@ func (b *Config) SetDate(id, date string) error {
 	return err
 }
 
-// SetReminder sets the reminder time for the given slack id
+// SetReminder sets the reminder time for the given slack id.
 func (b *Config) SetReminder(id string, t time.Time, ds, ts string) error {
 	_, err := b.Tracking().Update().
 		WithOptions(
@@ -59,7 +59,7 @@ func (b *Config) SetReminder(id string, t time.Time, ds, ts string) error {
 	return err
 }
 
-// SetTime sets the reminder time for the given slack id
+// SetTime sets the reminder time for the given slack id.
 func (b *Config) SetTime(id, t string) error {
 	_, err := b.tracking(b.connection).Update().
 		WithOptions(

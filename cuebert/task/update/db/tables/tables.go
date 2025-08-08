@@ -99,7 +99,7 @@ type Tables struct {
 	Log    logger.Logger
 }
 
-// New returns a new db connection
+// New returns a new db connection.
 func New(s *Tables) *Config {
 	return &Config{
 		admin:      a,
@@ -121,7 +121,7 @@ func (c *Config) Pool() *pgxpool.Pool {
 	return c.connection.DB.Pool
 }
 
-// returns a bool indicating if the serial number is in the exclusions table and a bool for the approval status
+// returns a bool indicating if the serial number is in the exclusions table and a bool for the approval status.
 func (c *Config) IsExcluded(serial string) (bool, bool) {
 	ex, err := c.Exclusion().By().Opts(exclusions.SerialNumber, serial).Query()
 	if err != nil {

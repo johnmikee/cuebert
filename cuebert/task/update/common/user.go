@@ -82,7 +82,7 @@ func (c *Common) GetSelfInfo() {
 	c.bot.Bot().AddCommand(definition)
 }
 
-// GetMDMUsers will return all users from the MDM
+// GetMDMUsers will return all users from the MDM.
 func (c *Common) GetMDMUsers(opts *mdm.QueryOpts) ([]mdm.User, error) {
 	var res mdm.DeviceResults
 	var err error

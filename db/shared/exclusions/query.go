@@ -62,7 +62,7 @@ func (q *Query) Query() (EI, error) {
 	return ex, nil
 }
 
-// All returns all exclusions in the table
+// All returns all exclusions in the table.
 func (q *Query) All() *Query {
 	q.sql = q.config.st.Select(q.config.columns...).From(q.config.table)
 

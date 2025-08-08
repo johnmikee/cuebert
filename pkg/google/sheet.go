@@ -9,7 +9,7 @@ import (
 	sheets "google.golang.org/api/sheets/v4"
 )
 
-// SheetInfo is the struct that holds the sheet info
+// SheetInfo is the struct that holds the sheet info.
 type SheetInfo struct {
 	EmployeeID int
 	Status     string
@@ -20,7 +20,7 @@ type SheetInfo struct {
 
 var expectedHeaders = []string{"Employee Id", "Status", "Email", "Name", "Manager"}
 
-// GetSheetVals returns a ValueRange of the values in the sheet
+// GetSheetVals returns a ValueRange of the values in the sheet.
 func (c *Client) GetSheetVals(s *sheets.Spreadsheet) (*sheets.ValueRange, error) {
 	return c.sheets.Spreadsheets.Values.Get(c.sheetID, getRangeSet(s)).Do()
 }
@@ -29,7 +29,7 @@ func (c *Client) getSheet() (*sheets.Spreadsheet, error) {
 	return c.sheets.Spreadsheets.Get(c.sheetID).Do()
 }
 
-// GetSheet returns the spreadsheet sorted
+// GetSheet returns the spreadsheet sorted.
 func (c *Client) GetSheet() []SheetInfo {
 	sheet, err := c.getSheet()
 	if err != nil {
@@ -95,7 +95,7 @@ func (c *Client) sortSheetVals(vr *sheets.ValueRange) []SheetInfo {
 
 // getRangeSet makes an assumption there is only one sheet in the spreadsheet
 // in our case, there is only one sheet but should that change this should be
-// updated to handle multiple sheets ranges
+// updated to handle multiple sheets ranges.
 func getRangeSet(s *sheets.Spreadsheet) string {
 	var maxRow int64
 	for _, j := range s.Sheets {
